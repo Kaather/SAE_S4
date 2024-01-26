@@ -68,7 +68,7 @@ def affichageGraphique(choix, graphe, joueurs_choix):
 
     running = True
     while running:
-        
+
         rectangles = []
 
         screen.blit(fond_image, (0, 0))
@@ -84,35 +84,35 @@ def affichageGraphique(choix, graphe, joueurs_choix):
                 if (x != 5) and (y != 11):
                     if 'N' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, 52, 10))
+                            Rectangle(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_WIDTH//120))
                     if 'S' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x, base_y + 52, 61, 10))
+                            Rectangle(BLACK, base_x, base_y + SCREEN_HEIGHT//13.8, SCREEN_HEIGHT//11.5, SCREEN_WIDTH//120))
                     if 'E' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x + 52, base_y, 10, 61))
+                            Rectangle(BLACK, base_x + SCREEN_HEIGHT//13.8, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//11.5))
                     if 'W' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, 10, 52))
+                            Rectangle(BLACK, base_x, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
                 else:
                     if 'N' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, 52, 10))
+                            Rectangle(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_WIDTH//120))
                     if 'E' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x + 52, base_y, 10, 61))
+                            Rectangle(BLACK, base_x + SCREEN_HEIGHT//13.8, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//11.5))
                     if 'W' in murs:
                         rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, 10, 52))
+                            Rectangle(BLACK, base_x, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
 
         # Ajustements pour les valeurs spécifiques
         base_x = (SCREEN_WIDTH // 3.63)
         base_y = (SCREEN_HEIGHT // 14)
 
         rectangles.append(Rectangle(BLACK, SCREEN_WIDTH //
-                            2.089, SCREEN_HEIGHT//1.143, 10, 52))
+                            2.089, SCREEN_HEIGHT//1.143, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
         rectangles.append(Rectangle(BLACK, SCREEN_WIDTH //
-                            1.925, SCREEN_HEIGHT//1.143, 10, 52))
+                            1.925, SCREEN_HEIGHT//1.143, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
 
         for rectangle in rectangles:
             rectangle.draw()
