@@ -1,33 +1,32 @@
-'''Nathan Rousselle TD1 / TPA
-Voici mon programme de jeu de plateau, malheureusement incomplet par manque de temps :( 
-j'ai pu créer un labyrinthe qui est possible à parcourir entièrement, il est par ailleurs généré
-aléatoirement, il est possible de s'y déplacer dedans à 1, 2, 3 et 4 joueurs.
-Chaque classe possède ses propres statistiques, je n'ai pas pu réellement les équilibrer.
-Il est possible pour les joueurs de ramasser de l'argent, j'avais prévu de faire un magasin mais
-je n'ai pas pu le faire malheureusement bien que sa conception me semble clair et facilement réalisable
-Les joueurs peuvent ramasser des potions et en consommer
-Les joueurs peuvent entrer dans des pièges pour combattre des monstres (il n'y a qu'un seul monstre malheureusement)
-Je n'ai pas pu créer le combat final par manque de temps mais en affrontant les 5 monstres (donc en allant dans les 5 pièges)
-il est possible d'activer le piège en or en se rendant à sa position, un message s'affichera et vous pourrez ouvrir le piege 
-ce qui vous montrera directement le message de victoire.
-Je n'ai pas eu le temps d'écrire les règles de mon jeu.
-J'ai pensé à ajouter des fonctionnalité comme s'échanger des potions / de l'argent ou pouvoir se provoquer
-en duel entre joueurs (facile) mais aussi être dans le noir dans le labyrinthe et il s'éclaire au fur et à mesure où
-l'on avance dedans (faisable).
-j'ai pensé à faire des animations mais evidemment je l'aurai fais à la toute fin
-Je tiens à très sincèrement m'excuser pour l'horrible qualité de ce code (répétition sans fin, non lisibilité du code, ...)
-'''
-
-
 import pygame
 import sys
 from labyrinthe import *
 from plateau import *
 from pygameOutils import *
 from jeuGraphique import *
+from jeuGraphiqueRéseau import *
+import socket
+import threading
 
-# Initialiser Pygame
 pygame.init()
+
+def recevoir_messages(client_socket):
+    while True:
+        try:
+            data = client_socket.recv(1024).decode()
+            if not data:
+                print("Le serveur s'est déconnecté.")
+                break
+            print(f"Message reçu du serveur : {data}")
+        except ConnectionError:
+            print("Erreur de connexion avec le serveur.")
+            break
+
+def nb_joueurs_multi(socket, numero):
+    print(numero)
+
+
+
 
 def nb_joueurs() :
     graphe = None
@@ -389,10 +388,13 @@ def credit() :
         pygame.display.update()
 
 def main_menu():
+    multi = False
+    
     bouton_1_survole = False
     bouton_2_survole = False
     bouton_3_survole = False
     bouton_4_survole = False
+    bouton_5_survole = False
 
     fond_image = pygame.image.load('img/map/foret.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -409,23 +411,27 @@ def main_menu():
         bouton_2 = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
         bouton_3 = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
         bouton_4 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//14), pygame.SRCALPHA)
+        bouton_5 = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
 
 
         bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
         bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
         bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
         bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
+        bouton_5.fill(BROWN_TR if not bouton_5_survole else BROWN)
 
 
-        screen.blit(bouton_1, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.4)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.6)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.8)))
+        screen.blit(bouton_1, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.3)))
+        screen.blit(bouton_2, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.45)))
+        screen.blit(bouton_3, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.6)))
         screen.blit(bouton_4, ((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9))
+        screen.blit(bouton_5, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.75)))
 
-        draw_text("Jouer", 60, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.375) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-        draw_text("Règles", 60, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.575) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-        draw_text("Quitter", 60, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.775) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-        draw_text("Crédits", 30, SCREEN_WIDTH*0.921, SCREEN_HEIGHT*0.91, BLACK)
+        draw_text("Jouer", 51, SCREEN_WIDTH/2, SCREEN_HEIGHT*(0.325), BLACK)
+        draw_text("Multi", 51, SCREEN_WIDTH/2, SCREEN_HEIGHT*(0.475), BLACK)
+        draw_text("Règles", 51, SCREEN_WIDTH/2, SCREEN_HEIGHT*(0.625), BLACK)
+        draw_text("Crédits", 30, SCREEN_WIDTH*0.92, SCREEN_HEIGHT*0.91, BLACK)
+        draw_text("Quitter", 51, SCREEN_WIDTH/2, SCREEN_HEIGHT*(0.775), BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -433,20 +439,49 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.4) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.6) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.922), SCREEN_HEIGHT*(0.932))).collidepoint((mx, my))
+                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.3) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
+                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.45) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
+                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.6) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
+                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my))
+                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.75) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.4) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)):
+                if bouton_1.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.3) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
                     nb_joueurs()
-                if bouton_2.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.6) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)):
+                if bouton_2.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.45) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
+                    multi = True
+                    
+                    
+                    host = '127.0.0.1'  # Adresse IP du serveur
+                    port = 5555
+                    
+                     # Créer le socket client
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+                    # Se connecter au serveur
+                    client_socket.connect((host, port))
+
+                    # Recevoir le message du serveur indiquant le numéro de joueur
+                    numero = client_socket.recv(1024).decode()
+                    print(f"Vous êtes le joueur {numero}")
+
+                    # Démarrer un thread pour recevoir les messages du serveur
+                    thread = threading.Thread(target=recevoir_messages, args=(client_socket,))
+                    thread.start()
+
+                    nb_joueurs_multi(client_socket, numero)
+                    
+                if bouton_3.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.6) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
                     regles()
-                if bouton_3.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)):
-                    pygame.quit()
-                    sys.exit()
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.922), SCREEN_HEIGHT*(0.932))).collidepoint((mx, my)) :
+                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my)):
                     credit()
+                if bouton_5.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.75) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
+                    pygame.quit()
+                    
+                    if multi:
+                        client_socket.close()
+                        thread.join()
+                    
+                    sys.exit()
                     
         pygame.display.update()
 

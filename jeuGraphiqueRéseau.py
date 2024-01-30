@@ -73,42 +73,26 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             for x in range(laby.getLargeur()):
                 case = laby.getCase(x, y)
                 murs = case.getMurs()
-
-                base_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.63)
-                base_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 14)
-
-                if (x != 5) and (y != 11):
+                if (x != 5) and (y != 11) :
                     if 'N' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_WIDTH//120))
+                        rectangles.append(Rectangle((BLACK), (x * 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 52, 10))
                     if 'S' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x, base_y + SCREEN_HEIGHT//13.8, SCREEN_HEIGHT//11.5, SCREEN_WIDTH//120))
+                        rectangles.append(Rectangle((BLACK), (x * 52) + (SCREEN_WIDTH // 3.63), (y * 52 + 52) + (SCREEN_HEIGHT // 14), 61, 10))
                     if 'E' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x + SCREEN_HEIGHT//13.8, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//11.5))
+                        rectangles.append(Rectangle((BLACK), (x * 52 + 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 10, 61))
                     if 'W' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
-                else:
+                        rectangles.append(Rectangle((BLACK), (x * 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 10, 52))
+
+                else :
                     if 'N' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_WIDTH//120))
+                        rectangles.append(Rectangle((BLACK), (x * 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 52, 10))
                     if 'E' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x + SCREEN_HEIGHT//13.8, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//11.5))
+                        rectangles.append(Rectangle((BLACK), (x * 52 + 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 10, 61))
                     if 'W' in murs:
-                        rectangles.append(
-                            Rectangle(BLACK, base_x, base_y, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
+                        rectangles.append(Rectangle((BLACK), (x * 52) + (SCREEN_WIDTH // 3.63), (y * 52) + (SCREEN_HEIGHT // 14), 10, 52))
 
-        # Ajustements pour les valeurs spécifiques
-        base_x = (SCREEN_WIDTH // 3.63)
-        base_y = (SCREEN_HEIGHT // 14)
-
-        rectangles.append(Rectangle(BLACK, SCREEN_WIDTH //
-                            2.089, SCREEN_HEIGHT//1.143, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
-        rectangles.append(Rectangle(BLACK, SCREEN_WIDTH //
-                            1.925, SCREEN_HEIGHT//1.143, SCREEN_WIDTH//120, SCREEN_HEIGHT//13.8))
+        rectangles.append(Rectangle((BLACK), 612 , 630, 10, 52))
+        rectangles.append(Rectangle((BLACK), 664 , 630, 10, 52))
 
         for rectangle in rectangles:
             rectangle.draw()
