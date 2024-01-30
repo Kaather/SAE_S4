@@ -78,8 +78,8 @@ def affichageGraphique(choix, graphe, joueurs_choix):
                 case = laby.getCase(x, y)
                 murs = case.getMurs()
 
-                base_x = (x * 52) + (SCREEN_WIDTH // 3.63)
-                base_y = (y * 52) + (SCREEN_HEIGHT // 14)
+                base_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.63)
+                base_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 14)
 
                 if (x != 5) and (y != 11):
                     if 'N' in murs:
