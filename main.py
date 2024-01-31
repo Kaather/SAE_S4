@@ -75,7 +75,7 @@ def nb_joueurs() :
         draw_text("2 Joueurs", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
         draw_text("3 Joueurs", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
         draw_text("4 Joueurs", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Quitter", 30, SCREEN_WIDTH*0.96, -5, BLACK)
+        draw_text("Retour", 30, SCREEN_WIDTH*0.96, -5, BLACK)
 
 
         for event in pygame.event.get():
@@ -105,7 +105,6 @@ def nb_joueurs() :
                 if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
                     classes = []
                     running = False
-
 
         pygame.display.update()
 
@@ -444,7 +443,8 @@ def main_menu():
                     regles()
                 if bouton_3.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)):
                     pygame.quit()
-                    sys.exit()
+                    print("Aucune statistiques disponibles !")
+                    sys.exit()                    
                 if bouton_4.get_rect(center=((SCREEN_WIDTH*0.922), SCREEN_HEIGHT*(0.932))).collidepoint((mx, my)) :
                     credit()
                     
