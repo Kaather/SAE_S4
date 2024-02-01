@@ -26,9 +26,67 @@ def nb_joueurs_multi(socket, numero):
     print(numero)
 
 
+def choix_difficulte():
+    bouton_1_survole = False
+    bouton_2_survole = False
+    bouton_3_survole = False
+
+    fond_image = pygame.image.load('img/map/dongeon.png').convert()
+    fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    difficulte = None  # Initialisation de la variable de difficulté
+
+    running = True
+    while running:
+        screen.blit(fond_image, (0, 0))
+        draw_text("Choisissez la difficulté :", 80, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
+
+        mx, my = pygame.mouse.get_pos()
+
+        bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
+        bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
+        bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
+
+        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
+        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
+        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
+
+        screen.blit(bouton_1, ((SCREEN_WIDTH*0.200) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
+        screen.blit(bouton_2, ((SCREEN_WIDTH*0.500) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
+        screen.blit(bouton_3, ((SCREEN_WIDTH*0.800) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
+
+        draw_text("Facile", 51, SCREEN_WIDTH*0.200, SCREEN_HEIGHT*(0.655), BLACK)
+        draw_text("Moyen", 51, SCREEN_WIDTH*0.500, SCREEN_HEIGHT*(0.655), BLACK)
+        draw_text("Difficile", 51, SCREEN_WIDTH*0.800, SCREEN_HEIGHT*(0.655), BLACK)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEMOTION:
+                mx, my = pygame.mouse.get_pos()
+                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.200), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.500), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.800), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.200), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    difficulte = "Facile"
+                    running = False
+                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.500), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    difficulte = "Moyen"
+                    running = False
+                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.800), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    difficulte = "Difficile"
+                    running = False
+
+        pygame.display.update()
+
+    print(difficulte)
+    return difficulte
 
 
-def nb_joueurs() :
+
+def nb_joueurs():
     graphe = None
 
     bouton_1_survole = False
@@ -48,46 +106,41 @@ def nb_joueurs() :
 
         mx, my = pygame.mouse.get_pos()
 
-        
         bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
         bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
         bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
         bouton_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
         bouton_5 = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
 
-
         bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
         bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
         bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
         bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
         bouton_5.fill(TRANSPARENT if not bouton_5_survole else BROWN)
-        
 
         screen.blit(bouton_1, ((SCREEN_WIDTH*0.12) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
         screen.blit(bouton_2, ((SCREEN_WIDTH*0.373) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
         screen.blit(bouton_3, ((SCREEN_WIDTH*0.626) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
         screen.blit(bouton_4, ((SCREEN_WIDTH*0.88) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
         screen.blit(bouton_5, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-        
 
         draw_text("1 Joueur", 51, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*(0.655), BLACK)
         draw_text("2 Joueurs", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
         draw_text("3 Joueurs", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
         draw_text("4 Joueurs", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Quitter", 30, SCREEN_WIDTH*0.96, -5, BLACK)
-
+        draw_text("Retour", 30, SCREEN_WIDTH*0.96, -5, BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEMOTION: 
+            if event.type == pygame.MOUSEMOTION:
                 mx, my = pygame.mouse.get_pos()
                 bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
                 bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
                 bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
                 bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))   
+                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     classes = [1]
@@ -98,21 +151,26 @@ def nb_joueurs() :
                 if bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     classes = [1, 2, 3]
                     running = False
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)) :
+                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     classes = [1, 2, 3, 4]
                     running = False
                 if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
                     classes = []
                     running = False
 
-
         pygame.display.update()
 
-    if classes :
+    # Check if "Retour" button was clicked
+    if not classes:
+        return
 
+    difficulte = choix_difficulte()
+
+    if classes:
         for player in range(len(classes)):
             archetypes(player + 1, graphe)
         map_choix(graphe, joueurs_choix)
+
 
 def archetypes(number, graphe) :
 
@@ -475,6 +533,7 @@ def main_menu():
                 if bouton_4.get_rect(center=((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my)):
                     credit()
                 if bouton_5.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.75) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
+                    print("Aucune statistique rentrée !")
                     pygame.quit()
                     
                     if multi:

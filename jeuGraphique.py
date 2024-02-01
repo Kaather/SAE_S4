@@ -216,7 +216,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             x, y = case
             pointRouge = Point((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8))
             pointRouge.draw((RED), (SCREEN_HEIGHT//150))
-        
+
 
 
         for event in pygame.event.get():
