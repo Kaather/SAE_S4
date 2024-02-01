@@ -178,6 +178,7 @@ def piege(graphe):
             piege_images.append(pygame.image.load('img/element/piege.png').convert())
             piege_images[-1].set_colorkey(BLACK)
             piege_images[-1] = pygame.transform.scale(piege_images[-1], (42, 42))
+            exclusions.append(position)
 
     # Ajouter un piège en or
     doree_piege_position = random.choice(cases_valides)
