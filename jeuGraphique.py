@@ -181,7 +181,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         
 
         # Affichage bouton ouvrir piège dorée (seulement si on a fait les 5 pièges et qu'on est sur la case du piège dorée)
-        if monstre_battu == 1 :
+        if monstre_battu == 5 :
             piege_doree_possible = True 
             draw_text("Vous pouvez aller", SCREEN_WIDTH//45, SCREEN_WIDTH*0.11, SCREEN_HEIGHT*0.83, BLACK)
             draw_text("ouvrir le piège dorée !", SCREEN_WIDTH//45, SCREEN_WIDTH*0.115, SCREEN_HEIGHT*0.88, BLACK)
