@@ -267,7 +267,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             if joueurs_piegee == True :
 
                 compteur = 5
-                while compteur >= 5 :
+                while compteur >= 1 :
                   
                     fond_image2 = pygame.image.load(fond[choix]).convert()
                     fond_image2 = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
