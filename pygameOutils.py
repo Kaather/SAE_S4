@@ -118,6 +118,7 @@ def afficherJoueursLaby(joueurs):
     # Parcours des joueurs et ajout de leurs positions au dictionnaire
     for joueur in joueurs:
         afficherJoueurLaby(joueur)
+        afficherJoueurLaby(joueur)
         position = joueur.position
         if position not in positions:
             positions[position] = []
@@ -164,6 +165,8 @@ def evenement(graphe):
             pieges_normaux.append(position)  # Ajouter la position du piège normal
             piege_images.append(pygame.image.load('img/element/piege.png').convert())
             piege_images[-1].set_colorkey(BLACK)
+            piege_images[-1] = pygame.transform.scale(piege_images[-1], (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
+            exclusions.append(position)
             piege_images[-1] = pygame.transform.scale(piege_images[-1], (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
             exclusions.append(position)
 
@@ -229,6 +232,7 @@ def ajouter_objet(graphe, piege_positions, piege_doree_position, shop_position):
 
             potion_images[-1].set_colorkey(BLACK)
             potion_images[-1] = pygame.transform.scale(potion_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
+            potion_images[-1] = pygame.transform.scale(potion_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
     while len(argent_positions) < 17:
         position = random.choice(cases_valides)
@@ -244,24 +248,29 @@ def ajouter_objet(graphe, piege_positions, piege_doree_position, shop_position):
 
             argent_images[-1].set_colorkey(BLACK)
             argent_images[-1] = pygame.transform.scale(argent_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
+            argent_images[-1] = pygame.transform.scale(argent_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
     return potion_positions, potion_images, argent_positions, argent_images
 
 
 
 
-def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
+def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur, nb_argent, nb_potion):
     if joueur_position in potion_positions:
         index = potion_positions.index(joueur_position)
         potion_positions.pop(index)
         del potion_images[index]
         joueur.ajouter_potion(1)
+        nb_potion += 1
 
     if joueur_position in argent_positions:
         index = argent_positions.index(joueur_position)
         argent_positions.pop(index)
         del argent_images[index]
         joueur.ajouter_argent(100)
+        nb_argent += 100
+    
+    return nb_argent, nb_potion, argent_positions, potion_positions
 
 def verifier_piege(joueur_position, piege_positions, piege_images) :
     if joueur_position in piege_positions :
