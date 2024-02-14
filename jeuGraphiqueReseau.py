@@ -5,6 +5,7 @@ from pygameOutils import *
 from labyrinthe import *
 from entite import *
 import time
+from bouton import *
 # from statistique import *
 
 pygame.init()
@@ -84,11 +85,11 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
     laby.construireAvecGraphe(graphe)
     
     # creer les images
-    _, _, piege_images, piege_doree_image = piege(graphe)
+    _, _, piege_images, piege_doree_image = evenement(graphe)
     _, potion_images, _, argent_images = ajouter_objet(graphe, [], [])
         
     if numero == "1" :
-        piege_positions, piege_doree_positions, piege_images, piege_doree_image = piege(graphe)
+        piege_positions, piege_doree_positions, piege_images, piege_doree_image = evenement(graphe)
         potion_positions, potion_images, argent_positions, argent_images = ajouter_objet(graphe, piege_positions, piege_doree_positions)
         
         serialisation = str(piege_doree_positions)
@@ -1462,7 +1463,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                             if int(numero) - 1 == joueurs_choix.index(joueurs_choix[compteur_lancers]) :
                                 liste_a_envoyer = []
                                                                 
-                                nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                                nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
                                 
                                 joueurs_choix[compteur_lancers].position = case
 
@@ -1529,7 +1530,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                     cases = liste_recu[0]
                     compteur_lancers = liste_recu[1]
                     joueurs_choix[compteur_lancers - 1].position = cases
-                    nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet(cases, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers - 1], nb_argent, nb_potion)
+                    nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet_stat(cases, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers - 1], nb_argent, nb_potion)
                     if joueur_sur_piege(joueurs_choix[compteur_lancers - 1], piege_positions) :
                         for joueur in joueurs_choix:
                             joueur.position = cases

@@ -6,6 +6,7 @@ from pygameOutils import *
 from jeuGraphique import *
 from jeuGraphiqueReseau import *
 from bouton import *
+from ia_deplacement import *
 import socket
 import time
 import os
@@ -174,12 +175,16 @@ def choix_difficulte():
                 if bouton_1.get_rect(center=((SCREEN_WIDTH*0.200), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     difficulte = "Facile"
                     running = False
+                    deplacement_facile()
                 if bouton_2.get_rect(center=((SCREEN_WIDTH*0.500), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     difficulte = "Moyen"
                     running = False
+                    deplacement_intermediaire()
                 if bouton_3.get_rect(center=((SCREEN_WIDTH*0.800), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
                     difficulte = "Difficile"
                     running = False
+                    deplacement_difficile()
+
 
         pygame.display.update()
 
@@ -724,33 +729,40 @@ def map_choix(graphe, joueurs_choix) :
         pygame.display.update()
 
 
-def regles() :
+def regles():
     bouton_5_survole = False
 
     fond_image = pygame.image.load('img/map/desert.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     running = True
-    while running :
+    while running:
 
         screen.blit(fond_image, (0, 0))
         mx, my = pygame.mouse.get_pos()
 
-        bouton_5 = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
+        bouton_5 = pygame.Surface((SCREEN_WIDTH // 12.4, SCREEN_HEIGHT // 22), pygame.SRCALPHA)
         bouton_5.fill(TRANSPARENT if not bouton_5_survole else BROWN)
-        screen.blit(bouton_5, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-        draw_text("Quitter", 30, SCREEN_WIDTH*0.96, -5, BLACK)
+        screen.blit(bouton_5, ((SCREEN_WIDTH * (0.92), SCREEN_HEIGHT * (0.001))))
+        draw_text("Quitter", 30, SCREEN_WIDTH * 0.96, -5, BLACK)
+
+        # Affichage des règles
+        draw_text("Règle 1", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.3, BLACK)
+        draw_text("Règle 2", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.4, BLACK)
+        draw_text("Règle 3", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5, BLACK)
+        draw_text("Règle 4", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.6, BLACK)
+        draw_text("Règle 5", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.7, BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEMOTION: 
+            if event.type == pygame.MOUSEMOTION:
                 mx, my = pygame.mouse.get_pos()
-                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH * 0.965), SCREEN_HEIGHT * (0.015))).collidepoint((mx, my))
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
-                    running = False 
+                if bouton_5.get_rect(center=(SCREEN_WIDTH * 0.965, SCREEN_HEIGHT * 0.015)).collidepoint((mx, my)):
+                    running = False
 
         pygame.display.update()
 
@@ -844,7 +856,7 @@ def main_menu():
                 bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.3) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
                 bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.45) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
                 bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.6) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my))
+                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.86) + (SCREEN_WIDTH//8)//2, SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my))
                 bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.75) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my))
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_1.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.3) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
@@ -885,7 +897,7 @@ def main_menu():
                             compteur -= 1  
                 if bouton_3.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.6) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
                     regles()
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.86), SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my)):
+                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.86) + (SCREEN_WIDTH//8)//2, SCREEN_HEIGHT*0.9 + SCREEN_HEIGHT//14/2)).collidepoint((mx, my)) :
                     credit()
                 if bouton_5.get_rect(center=((SCREEN_WIDTH/2), (SCREEN_HEIGHT*(0.75) + SCREEN_HEIGHT//7.5/2))).collidepoint((mx, my)):
                     print("Aucune statistique rentrée !")

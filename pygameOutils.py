@@ -255,7 +255,7 @@ def ajouter_objet(graphe, piege_positions, piege_doree_position, shop_position):
 
 
 
-def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur, nb_argent, nb_potion):
+def verifier_objet_stat(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur, nb_argent, nb_potion):
     if joueur_position in potion_positions:
         index = potion_positions.index(joueur_position)
         potion_positions.pop(index)
@@ -271,6 +271,19 @@ def verifier_objet(joueur_position, potion_positions, potion_images, argent_posi
         nb_argent += 100
     
     return nb_argent, nb_potion, argent_positions, potion_positions
+
+def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
+    if joueur_position in potion_positions:
+        index = potion_positions.index(joueur_position)
+        potion_positions.pop(index)
+        del potion_images[index]
+        joueur.ajouter_potion(1)
+
+    if joueur_position in argent_positions:
+        index = argent_positions.index(joueur_position)
+        argent_positions.pop(index)
+        del argent_images[index]
+        joueur.ajouter_argent(100)
 
 def verifier_piege(joueur_position, piege_positions, piege_images) :
     if joueur_position in piege_positions :
