@@ -17,23 +17,6 @@ class Joueur(Entite):
         self.argent = 100
         self.lancer_fait = False
 
-    def deplacer(self, direction):
-        x, y = self.position
-        dx, dy = direction
-
-        new_x = x + dx
-        new_y = y + dy
-
-        new_position = (new_x, new_y)
-        voisines = self.graphe[self.position]
-
-        if new_position in voisines:
-            self.position = new_position
-            return True
-        else:
-            print(f"Le déplacement vers {new_position} n'est pas possible.")
-            return False
-
     def afficher_position(self):
         print(f"{self.nom} est à la position {self.position}")
 
