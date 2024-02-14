@@ -121,18 +121,16 @@ def afficherJoueurLaby(joueur):
     
     joueur_image = pygame.image.load(joueur.image).convert()
     joueur_image.set_colorkey(BLACK)
-    joueur_image = pygame.transform.scale(joueur_image, (45, 45))  
-    screen.blit(joueur_image, (joueur.position[0] * 52 + 361, joueur.position[1] * 52 + 58))
+    joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//28, SCREEN_WIDTH//28))  
+    screen.blit(joueur_image, (joueur.position[0] * (SCREEN_WIDTH//24.5) + SCREEN_WIDTH//3.55, joueur.position[1] * (SCREEN_WIDTH//24.5) + SCREEN_WIDTH//22))
+        
 
 def afficherJoueursLaby(joueurs):
     positions = {}  # Dictionnaire pour stocker les positions des joueurs
 
     # Parcours des joueurs et ajout de leurs positions au dictionnaire
     for joueur in joueurs:
-        joueur_image = pygame.image.load(joueur.image).convert()
-        joueur_image.set_colorkey(BLACK)
-        joueur_image = pygame.transform.scale(joueur_image, (45, 45))  
-        screen.blit(joueur_image, (joueur.position[0] * 52 + 361, joueur.position[1] * 52 + 58))
+        afficherJoueurLaby(joueur)
         position = joueur.position
         if position not in positions:
             positions[position] = []
@@ -177,7 +175,8 @@ def piege(graphe):
             pieges_normaux.append(position)  # Ajouter la position du piège normal
             piege_images.append(pygame.image.load('img/element/piege.png').convert())
             piege_images[-1].set_colorkey(BLACK)
-            piege_images[-1] = pygame.transform.scale(piege_images[-1], (42, 42))
+            piege_images[-1] = pygame.transform.scale(piege_images[-1], (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
+            exclusions.append(position)
 
     # Ajouter un piège en or
     doree_piege_position = random.choice(cases_valides)
@@ -188,7 +187,7 @@ def piege(graphe):
 
     pieges_dores.append(doree_piege_position)  # Ajouter la position du piège en or
     piege_doree_image.set_colorkey(BLACK)
-    piege_doree_image = pygame.transform.scale(piege_doree_image, (42, 42))
+    piege_doree_image = pygame.transform.scale(piege_doree_image, (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
 
     return pieges_normaux, pieges_dores, piege_images, piege_doree_image
 
@@ -226,7 +225,7 @@ def ajouter_objet(graphe, piege_positions, piege_doree_positions):
             potion_images.append(pygame.image.load('img/element/Potion.png').convert())
 
             potion_images[-1].set_colorkey(BLACK)
-            potion_images[-1] = pygame.transform.scale(potion_images[-1], (30, 30))
+            potion_images[-1] = pygame.transform.scale(potion_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
     while len(argent_positions) < 10:
         position = random.choice(cases_valides)
@@ -240,25 +239,29 @@ def ajouter_objet(graphe, piege_positions, piege_doree_positions):
             argent_images.append(pygame.image.load('img/element/argent.png').convert())
 
             argent_images[-1].set_colorkey(BLACK)
-            argent_images[-1] = pygame.transform.scale(argent_images[-1], (30, 30))
+            argent_images[-1] = pygame.transform.scale(argent_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
     return potion_positions, potion_images, argent_positions, argent_images
 
 
 
 
-def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
+def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur, nb_argent, nb_potion):
     if joueur_position in potion_positions:
         index = potion_positions.index(joueur_position)
         potion_positions.pop(index)
         del potion_images[index]
         joueur.ajouter_potion(1)
+        nb_potion += 1
 
     if joueur_position in argent_positions:
         index = argent_positions.index(joueur_position)
         argent_positions.pop(index)
         del argent_images[index]
         joueur.ajouter_argent(100)
+        nb_argent += 100
+    
+    return nb_argent, nb_potion, argent_positions, potion_positions
 
 def verifier_piege(joueur_position, piege_positions, piege_images) :
     if joueur_position in piege_positions :
