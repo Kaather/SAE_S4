@@ -26,7 +26,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
     'img/map/desert.png',  
     'img/map/neige.png',
     'img/map/foret.png',
-    'img/map/dongeon.png'
+    'img/map/donjon.png'
     ]
 
     liste_loup = []

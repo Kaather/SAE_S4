@@ -19,11 +19,11 @@ GREY_TR = (128, 128, 128, 100)
 font_path = "font/MedievalSharp-Bold.ttf"
 
 class Bouton:
-    def __init__(self, largeur, hauteur, pos_x, pos_y, couleur, survol, texte="", taille_texte=30):
+    def __init__(self, largeur, hauteur, centre_x, centre_y, couleur, survol, texte="", taille_texte=30):
         self.largeur = largeur
         self.hauteur = hauteur
-        self.pos_x = pos_x
-        self.pos_y = pos_y
+        self.pos_x = centre_x - largeur // 2
+        self.pos_y = centre_y - hauteur // 2
         self.bouton_normale = pygame.Surface((largeur, hauteur), pygame.SRCALPHA)
         self.bouton_survol = pygame.Surface((largeur, hauteur), pygame.SRCALPHA)
         self.bouton_actuelle = self.bouton_normale
@@ -72,6 +72,7 @@ if __name__ == "__main__" :
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
             if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
                 bouton_1.hovered = bouton_1.est_survol(mx, my)
