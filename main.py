@@ -19,70 +19,66 @@ def nb_joueurs_multi(socket, numero):
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    bouton_2j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "2 Joueurs", SCREEN_WIDTH//25)
+    bouton_3j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "3 Joueurs", SCREEN_WIDTH//25)
+    bouton_4j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "4 Joueurs", SCREEN_WIDTH//25)
+    bouton_quitter = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Quitter", SCREEN_WIDTH//45)
+
     if numero == "1":
-        bouton_2_survole = False
-        bouton_3_survole = False
-        bouton_4_survole = False
-        bouton_5_survole = False
         running = True
         while running:
             screen.blit(fond_image, (0, 0))
             draw_text("Combien de joueurs ?", 120, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
-
             mx, my = pygame.mouse.get_pos()
-
-            bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_5 = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-
-            bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-            bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-            bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-            bouton_5.fill(TRANSPARENT if not bouton_5_survole else BROWN)
-
-            screen.blit(bouton_2, ((SCREEN_WIDTH*0.373) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_3, ((SCREEN_WIDTH*0.626) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_4, ((SCREEN_WIDTH*0.88) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_5, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-
-            draw_text("2 Joueurs", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("3 Joueurs", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("4 Joueurs", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("Quitter", 30, SCREEN_WIDTH*0.96, -5, BLACK)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
                 if event.type == pygame.MOUSEMOTION:
                     mx, my = pygame.mouse.get_pos()
-                    bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+                    bouton_2j.hovered = bouton_2j.est_survol(mx, my)
+                    bouton_3j.hovered = bouton_3j.est_survol(mx, my)
+                    bouton_4j.hovered = bouton_4j.est_survol(mx, my)
+                    bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    if bouton_2j.est_survol(mx, my):
                         classes = [1, 2]
                         max_joueurs = 2
                         running = False
                         socket.send(str.encode(str(classes)))
-                    if bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                    if bouton_3j.est_survol(mx, my):
                         classes = [1, 2, 3]
                         max_joueurs = 3
                         running = False
                         socket.send(str.encode(str(classes)))
-                    if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)) :
+
+                    if bouton_4j.est_survol(mx, my):
                         classes = [1, 2, 3, 4]
                         max_joueurs = 4
                         running = False
                         socket.send(str.encode(str(classes)))
-                    if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+
+                    if bouton_quitter.est_survol(mx, my):
                         classes = []
                         running = False
                         socket.send(str.encode(str(classes)))
 
-            pygame.display.update()
+            bouton_2j.bouton_actuelle = bouton_2j.bouton_survol if bouton_2j.hovered else bouton_2j.bouton_normale
+            bouton_3j.bouton_actuelle = bouton_3j.bouton_survol if bouton_3j.hovered else bouton_3j.bouton_normale
+            bouton_4j.bouton_actuelle = bouton_4j.bouton_survol if bouton_4j.hovered else bouton_4j.bouton_normale
+            bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
+
+            bouton_2j.dessiner(screen)
+            bouton_3j.dessiner(screen)
+            bouton_4j.dessiner(screen)
+            bouton_quitter.dessiner(screen)
+
+            pygame.display.flip()
+            pygame.time.Clock().tick(FPS)
 
     else:
         fond_image = pygame.image.load('img/map/donjon.png').convert()
@@ -130,75 +126,64 @@ def nb_joueurs_multi(socket, numero):
         map_choix_multi(graphe, joueurs_choix, numero, socket)
 
 def choix_difficulte():
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    difficulte = None  # Initialisation de la variable de difficulté
+    bouton_facile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.2, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Facile", SCREEN_WIDTH//25)
+    bouton_moyen = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Moyen", SCREEN_WIDTH//25)
+    bouton_difficile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.8, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Difficile", SCREEN_WIDTH//25)
+
+    difficulte = None
 
     running = True
     while running:
         screen.blit(fond_image, (0, 0))
-        draw_text("Choisissez la difficulté :", 80, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
-
+        draw_text("Choisissez la difficulté :", SCREEN_WIDTH//16, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
         mx, my = pygame.mouse.get_pos()
-
-        bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-
-        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-
-        screen.blit(bouton_1, ((SCREEN_WIDTH*0.200) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH*0.500) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH*0.800) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-
-        draw_text("Facile", 51, SCREEN_WIDTH*0.200, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Moyen", 51, SCREEN_WIDTH*0.500, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Difficile", 51, SCREEN_WIDTH*0.800, SCREEN_HEIGHT*(0.655), BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEMOTION:
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.200), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.500), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.800), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+                bouton_facile.hovered = bouton_facile.est_survol(mx, my)
+                bouton_moyen.hovered = bouton_moyen.est_survol(mx, my)
+                bouton_difficile.hovered = bouton_difficile.est_survol(mx, my)
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.200), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                if bouton_facile.est_survol(mx, my):
                     difficulte = "Facile"
                     running = False
                     deplacement_facile()
-                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.500), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_moyen.est_survol(mx, my):
                     difficulte = "Moyen"
                     running = False
                     deplacement_intermediaire()
-                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.800), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_difficile.est_survol(mx, my):
                     difficulte = "Difficile"
                     running = False
                     deplacement_difficile()
 
+        bouton_facile.bouton_actuelle = bouton_facile.bouton_survol if bouton_facile.hovered else bouton_facile.bouton_normale
+        bouton_moyen.bouton_actuelle = bouton_moyen.bouton_survol if bouton_moyen.hovered else bouton_moyen.bouton_normale
+        bouton_difficile.bouton_actuelle = bouton_difficile.bouton_survol if bouton_difficile.hovered else bouton_difficile.bouton_normale
 
-        pygame.display.update()
+        bouton_facile.dessiner(screen)
+        bouton_moyen.dessiner(screen)
+        bouton_difficile.dessiner(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
 
     print(difficulte)
     return difficulte
 
 def archetypes_multi(number, graphe, socket) :
-
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
-    bouton_4_survole = False
-    bouton_5_survole = False
-    bouton_6_survole = False
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -228,99 +213,70 @@ def archetypes_multi(number, graphe, socket) :
     if number != 1 :
         imgHealer_rect = imgHealer.get_rect(center=(SCREEN_WIDTH * 0.9, SCREEN_HEIGHT * 0.78))
 
+    bouton_paladin = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Paladin", SCREEN_WIDTH//30)
+    bouton_archer = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Archer", SCREEN_WIDTH//30)
+    bouton_mage = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Mage", SCREEN_WIDTH//30)
+    bouton_berserk = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Berserk", SCREEN_WIDTH//30)
+    bouton_assassin = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Assassin", SCREEN_WIDTH//30)
+    if number != 1 :
+        bouton_healer = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Healer", SCREEN_WIDTH//30)
+
     running = True
     while running:
 
         screen.blit(fond_image, (0, 0))
         draw_text("Choisissez votre classe !", 80, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.01, BLACK)
         draw_text(f"Joueur {number} :", 70, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.15, BLACK)
-
         mx, my = pygame.mouse.get_pos()
-
         
-        bouton_1 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_2 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_3 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_4 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_5 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        if number != 1 :
-            bouton_6 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-
-
-        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-        bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-        bouton_5.fill(BROWN_TR if not bouton_5_survole else BROWN)
-        if number != 1 :
-            bouton_6.fill(BROWN_TR if not bouton_6_survole else BROWN)
-        
-
-        screen.blit(bouton_1, ((SCREEN_WIDTH*0.1) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH*0.5) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH*0.9) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_4, ((SCREEN_WIDTH*0.1) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        screen.blit(bouton_5, ((SCREEN_WIDTH*0.5) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        if number != 1 :
-            screen.blit(bouton_6, ((SCREEN_WIDTH*0.9) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        
-
-        draw_text("Paladin", 41, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Archer", 41, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Mage", 41, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Berserk", 41, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*(0.905), BLACK)
-        draw_text("Assassin", 41, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*(0.905), BLACK)
-        if number != 1 :
-            draw_text("Healer", 41, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*(0.905), BLACK)
-
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
+                bouton_paladin.hovered = bouton_paladin.est_survol(mx, my)
+                bouton_archer.hovered = bouton_archer.est_survol(mx, my)
+                bouton_mage.hovered = bouton_mage.est_survol(mx, my)
+                bouton_berserk.hovered = bouton_berserk.est_survol(mx, my)
+                bouton_assassin.hovered = bouton_assassin.est_survol(mx, my)
                 if number != 1 :
-                    bouton_6_survole = bouton_6.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
+                    bouton_healer.hovered = bouton_healer.est_survol(mx, my)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_paladin.est_survol(mx, my):
                     liste = ["Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 5, 100, "img/classe/Paladin.png"]
                     joueur = Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 5, 100, "img/classe/Paladin.png")
                     socket.send(str.encode(str(liste)))
                     running = False
 
-                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_archer.est_survol(mx, my):
                     liste = ["Archer", graphe, (5,10), 80, 80, 15, 5, 20, 5, 100, "img/classe/Archer.png"]
                     joueur = Joueur("Archer", graphe, (5,10), 80, 80, 15, 5, 20, 5, 100, "img/classe/Archer.png")
                     socket.send(str.encode(str(liste)))
                     running = False
 
-                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_mage.est_survol(mx, my):
                     liste = ["Mage", graphe, (5,10), 80, 80, 5, 25, 8, 5, 100, "img/classe/Mage.png"]
                     joueur = Joueur("Mage", graphe, (5,10), 80, 80, 5, 25, 8, 5, 100, "img/classe/Mage.png")
                     socket.send(str.encode(str(liste)))
                     running = False
 
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)) :
+                if bouton_berserk.est_survol(mx, my):
                     liste = ["Berserk", graphe, (5,10),120, 120, 20, 5, 12, 5, 100, "img/classe/Berserk.png"]
                     joueur = Joueur("Berserk", graphe, (5,10),120, 120, 20, 5, 12, 5, 100, "img/classe/Berserk.png")
                     socket.send(str.encode(str(liste)))
                     running = False
 
-                if bouton_5.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_assassin.est_survol(mx, my):
                     liste = ["Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 5, 100, "img/classe/Assassin.png"]
                     joueur = Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 5, 100, "img/classe/Assassin.png")
                     socket.send(str.encode(str(liste)))
                     running = False
 
                 if number != 1 :    
-                    if bouton_6.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)) :
+                    if bouton_healer.est_survol(mx, my):
                         liste = ["Healer", graphe, (5,10), 70, 70, 0, 30, 10, 5, 100, "img/classe/Healer.png"]
                         joueur = Joueur("Healer", graphe, (5,10), 70, 70, 0, 30, 10, 5, 100, "img/classe/Healer.png")
                         socket.send(str.encode(str(liste)))
@@ -335,17 +291,36 @@ def archetypes_multi(number, graphe, socket) :
         if number != 1 :
             screen.blit(imgHealer, imgHealer_rect)
 
-        pygame.display.update()
+        bouton_paladin.bouton_actuelle = bouton_paladin.bouton_survol if bouton_paladin.hovered else bouton_paladin.bouton_normale
+        bouton_archer.bouton_actuelle = bouton_archer.bouton_survol if bouton_archer.hovered else bouton_archer.bouton_normale
+        bouton_mage.bouton_actuelle = bouton_mage.bouton_survol if bouton_mage.hovered else bouton_mage.bouton_normale
+        bouton_berserk.bouton_actuelle = bouton_berserk.bouton_survol if bouton_berserk.hovered else bouton_berserk.bouton_normale
+        bouton_assassin.bouton_actuelle = bouton_assassin.bouton_survol if bouton_assassin.hovered else bouton_assassin.bouton_normale
+        if number != 1 :
+            bouton_healer.bouton_actuelle = bouton_healer.bouton_survol if bouton_healer.hovered else bouton_healer.bouton_normale
+
+        bouton_paladin.dessiner(screen)
+        bouton_archer.dessiner(screen)
+        bouton_mage.dessiner(screen)
+        bouton_berserk.dessiner(screen)
+        bouton_assassin.dessiner(screen)
+        if number != 1 :
+            bouton_healer.dessiner(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
+
     return joueur
 
 def map_choix_multi(graphe, joueurs_choix, numero, socket):
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
-    bouton_4_survole = False
-
+    
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    bouton_desert = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Desert", SCREEN_WIDTH//30)
+    bouton_neige = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Neige", SCREEN_WIDTH//30)
+    bouton_foret = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Foret", SCREEN_WIDTH//30)
+    bouton_donjon = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Donjon", SCREEN_WIDTH//30)
 
     if numero == "1":
         running = True
@@ -356,56 +331,47 @@ def map_choix_multi(graphe, joueurs_choix, numero, socket):
 
             mx, my = pygame.mouse.get_pos()
 
-            
-            bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-            bouton_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-
-            bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-            bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-            bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-            bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-
-            screen.blit(bouton_1, ((SCREEN_WIDTH*0.12) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_2, ((SCREEN_WIDTH*0.373) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_3, ((SCREEN_WIDTH*0.626) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            screen.blit(bouton_4, ((SCREEN_WIDTH*0.88) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-            
-            draw_text("Desert", 51, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("Neige", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("Foret", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
-            draw_text("donjon", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEMOTION: 
                     mx, my = pygame.mouse.get_pos()
-                    bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                    bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+                    bouton_desert.hovered = bouton_desert.est_survol(mx, my)
+                    bouton_neige.hovered = bouton_neige.est_survol(mx, my)
+                    bouton_foret.hovered = bouton_foret.est_survol(mx, my)
+                    bouton_donjon.hovered = bouton_donjon.est_survol(mx, my)
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    if bouton_desert.est_survol(mx, my):
                         socket.send(str.encode(str(0)))
                         maps = 0
                         running = False
-                    if bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    if bouton_neige.est_survol(mx, my):
                         socket.send(str.encode(str(1)))
                         maps = 1
                         running = False
-                    if bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                    if bouton_foret.est_survol(mx, my):
                         socket.send(str.encode(str(2)))
                         maps = 2
                         running = False
-                    if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)) :
+                    if bouton_donjon.est_survol(mx, my):
                         socket.send(str.encode(str(3)))
                         maps = 3
                         running = False
 
-            pygame.display.update()
+            bouton_desert.bouton_actuelle = bouton_desert.bouton_survol if bouton_desert.hovered else bouton_desert.bouton_normale
+            bouton_neige.bouton_actuelle = bouton_neige.bouton_survol if bouton_neige.hovered else bouton_neige.bouton_normale
+            bouton_foret.bouton_actuelle = bouton_foret.bouton_survol if bouton_foret.hovered else bouton_foret.bouton_normale
+            bouton_donjon.bouton_actuelle = bouton_donjon.bouton_survol if bouton_donjon.hovered else bouton_donjon.bouton_normale
+
+            bouton_desert.dessiner(screen)
+            bouton_neige.dessiner(screen)
+            bouton_foret.dessiner(screen)
+            bouton_donjon.dessiner(screen)
+            
+            pygame.display.flip()
+            pygame.time.Clock().tick(FPS)
     
     else:
         fond_image = pygame.image.load('img/map/donjon.png').convert()
@@ -438,78 +404,72 @@ def map_choix_multi(graphe, joueurs_choix, numero, socket):
 def nb_joueurs() :
     graphe = None
 
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
-    bouton_4_survole = False
-    bouton_5_survole = False
-
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    bouton_1j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "1 Joueur", SCREEN_WIDTH//25)
+    bouton_2j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "2 Joueurs", SCREEN_WIDTH//25)
+    bouton_3j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "3 Joueurs", SCREEN_WIDTH//25)
+    bouton_4j = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "4 Joueurs", SCREEN_WIDTH//25)
+    bouton_retour = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Retour", SCREEN_WIDTH//45)
 
     running = True
     while running:
 
         screen.blit(fond_image, (0, 0))
         draw_text("Combien de joueurs ?", 120, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
-
+        
         mx, my = pygame.mouse.get_pos()
-
-        bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_5 = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-
-        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-        bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-        bouton_5.fill(TRANSPARENT if not bouton_5_survole else BROWN)
-
-        screen.blit(bouton_1, ((SCREEN_WIDTH*0.12) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH*0.373) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH*0.626) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_4, ((SCREEN_WIDTH*0.88) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_5, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-
-        draw_text("1 Joueur", 51, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("2 Joueurs", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("3 Joueurs", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("4 Joueurs", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Retour", 30, SCREEN_WIDTH*0.96, -5, BLACK)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEMOTION:
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+                bouton_1j.hovered = bouton_1j.est_survol(mx, my)
+                bouton_2j.hovered = bouton_2j.est_survol(mx, my)
+                bouton_3j.hovered = bouton_3j.est_survol(mx, my)
+                bouton_4j.hovered = bouton_4j.est_survol(mx, my)
+                bouton_retour.hovered = bouton_retour.est_survol(mx, my)
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                if bouton_1j.est_survol(mx, my):
                     classes = [1]
                     running = False
-                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_2j.est_survol(mx, my):
                     classes = [1, 2]
                     running = False
-                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_3j.est_survol(mx, my):
                     classes = [1, 2, 3]
                     running = False
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_4j.est_survol(mx, my):
                     classes = [1, 2, 3, 4]
                     running = False
-                if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+
+                if bouton_retour.est_survol(mx, my):
                     classes = []
                     running = False
 
-        pygame.display.update()
+        bouton_1j.bouton_actuelle = bouton_1j.bouton_survol if bouton_1j.hovered else bouton_1j.bouton_normale
+        bouton_2j.bouton_actuelle = bouton_2j.bouton_survol if bouton_2j.hovered else bouton_2j.bouton_normale
+        bouton_3j.bouton_actuelle = bouton_3j.bouton_survol if bouton_3j.hovered else bouton_3j.bouton_normale
+        bouton_4j.bouton_actuelle = bouton_4j.bouton_survol if bouton_4j.hovered else bouton_4j.bouton_normale
+        bouton_retour.bouton_actuelle = bouton_retour.bouton_survol if bouton_retour.hovered else bouton_retour.bouton_normale
 
-    # Check if "Retour" button was clicked
+        bouton_1j.dessiner(screen)
+        bouton_2j.dessiner(screen)
+        bouton_3j.dessiner(screen)
+        bouton_4j.dessiner(screen)
+        bouton_retour.dessiner(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
+
     if not classes:
         return
 
@@ -522,13 +482,6 @@ def nb_joueurs() :
 
 
 def archetypes(number, graphe) :
-
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
-    bouton_4_survole = False
-    bouton_5_survole = False
-    bouton_6_survole = False
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -558,6 +511,14 @@ def archetypes(number, graphe) :
     if number != 1 :
         imgHealer_rect = imgHealer.get_rect(center=(SCREEN_WIDTH * 0.9, SCREEN_HEIGHT * 0.78))
 
+    bouton_paladin = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Paladin", SCREEN_WIDTH//30)
+    bouton_archer = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Archer", SCREEN_WIDTH//30)
+    bouton_mage = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*0.6, BROWN_TR, BROWN, "Mage", SCREEN_WIDTH//30)
+    bouton_berserk = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Berserk", SCREEN_WIDTH//30)
+    bouton_assassin = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Assassin", SCREEN_WIDTH//30)
+    if number != 1 :
+        bouton_healer = Bouton(SCREEN_WIDTH//6, SCREEN_HEIGHT//12, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*0.95, BROWN_TR, BROWN, "Healer", SCREEN_WIDTH//30)
+
     running = True
     while running:
 
@@ -567,80 +528,44 @@ def archetypes(number, graphe) :
 
         mx, my = pygame.mouse.get_pos()
 
-        
-        bouton_1 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_2 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_3 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_4 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        bouton_5 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-        if number != 1 :
-            bouton_6 = pygame.Surface((SCREEN_WIDTH//6, SCREEN_HEIGHT//12), pygame.SRCALPHA)
-
-
-        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-        bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-        bouton_5.fill(BROWN_TR if not bouton_5_survole else BROWN)
-        if number != 1 :
-            bouton_6.fill(BROWN_TR if not bouton_6_survole else BROWN)
-        
-
-        screen.blit(bouton_1, ((SCREEN_WIDTH*0.1) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH*0.5) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH*0.9) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.55)))
-        screen.blit(bouton_4, ((SCREEN_WIDTH*0.1) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        screen.blit(bouton_5, ((SCREEN_WIDTH*0.5) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        if number != 1 :
-            screen.blit(bouton_6, ((SCREEN_WIDTH*0.9) - (SCREEN_WIDTH//6/2), SCREEN_HEIGHT*(0.9)))
-        
-
-        draw_text("Paladin", 41, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Archer", 41, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Mage", 41, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*(0.555), BLACK)
-        draw_text("Berserk", 41, SCREEN_WIDTH*0.1, SCREEN_HEIGHT*(0.905), BLACK)
-        draw_text("Assassin", 41, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*(0.905), BLACK)
-        if number != 1 :
-            draw_text("Healer", 41, SCREEN_WIDTH*0.9, SCREEN_HEIGHT*(0.905), BLACK)
-
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
-                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
+                bouton_paladin.hovered = bouton_paladin.est_survol(mx, my)
+                bouton_archer.hovered = bouton_archer.est_survol(mx, my)
+                bouton_mage.hovered = bouton_mage.est_survol(mx, my)
+                bouton_berserk.hovered = bouton_berserk.est_survol(mx, my)
+                bouton_assassin.hovered = bouton_assassin.est_survol(mx, my)
                 if number != 1 :
-                    bouton_6_survole = bouton_6.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my))
+                    bouton_healer.hovered = bouton_healer.est_survol(mx, my)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_paladin.est_survol(mx, my):
                     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
                     running = False
 
-                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_archer.est_survol(mx, my):
                     joueurs_choix.append(Joueur("Archer", graphe, (5,10), 80, 80, 15, 5, 20, 3, 100, "img/classe/Archer.png"))
                     running = False
 
-                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.55) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_mage.est_survol(mx, my):
                     joueurs_choix.append(Joueur("Mage", graphe, (5,10), 80, 80, 5, 25, 8, 3, 100, "img/classe/Mage.png"))
                     running = False
 
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.1), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)) :
+                if bouton_berserk.est_survol(mx, my):
                     joueurs_choix.append(Joueur("Berserk", graphe, (5,10),120, 120, 20, 5, 12, 3, 100, "img/classe/Berserk.png"))
                     running = False
 
-                if bouton_5.get_rect(center=((SCREEN_WIDTH*0.5), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)):
+                if bouton_assassin.est_survol(mx, my):
                     joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))
                     running = False
 
                 if number != 1 :    
-                    if bouton_6.get_rect(center=((SCREEN_WIDTH*0.9), (SCREEN_HEIGHT*(0.9) + SCREEN_HEIGHT//12/2))).collidepoint((mx, my)) :
+                    if bouton_healer.est_survol(mx, my):
                         joueurs_choix.append(Joueur("Healer", graphe, (5,10), 70, 70, 0, 30, 10, 3, 100, "img/classe/Healer.png"))
                         running = False
 
@@ -653,85 +578,87 @@ def archetypes(number, graphe) :
         if number != 1 :
             screen.blit(imgHealer, imgHealer_rect)
 
-        pygame.display.update()
+        bouton_paladin.bouton_actuelle = bouton_paladin.bouton_survol if bouton_paladin.hovered else bouton_paladin.bouton_normale
+        bouton_archer.bouton_actuelle = bouton_archer.bouton_survol if bouton_archer.hovered else bouton_archer.bouton_normale
+        bouton_mage.bouton_actuelle = bouton_mage.bouton_survol if bouton_mage.hovered else bouton_mage.bouton_normale
+        bouton_berserk.bouton_actuelle = bouton_berserk.bouton_survol if bouton_berserk.hovered else bouton_berserk.bouton_normale
+        bouton_assassin.bouton_actuelle = bouton_assassin.bouton_survol if bouton_assassin.hovered else bouton_assassin.bouton_normale
+        if number != 1 :
+            bouton_healer.bouton_actuelle = bouton_healer.bouton_survol if bouton_healer.hovered else bouton_healer.bouton_normale
+
+        bouton_paladin.dessiner(screen)
+        bouton_archer.dessiner(screen)
+        bouton_mage.dessiner(screen)
+        bouton_berserk.dessiner(screen)
+        bouton_assassin.dessiner(screen)
+        if number != 1 :
+            bouton_healer.dessiner(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
 
     return joueurs_choix
 
+
 def map_choix(graphe, joueurs_choix) :
-    bouton_1_survole = False
-    bouton_2_survole = False
-    bouton_3_survole = False
-    bouton_4_survole = False
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-    bouton_desert = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Desert", SCREEN_WIDTH//45)
-    bouton_neige = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Neige", SCREEN_WIDTH//45)
-    bouton_foret = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Foret", SCREEN_WIDTH//45)
-    bouton_donjon = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Quitter", SCREEN_WIDTH//45)
+    bouton_desert = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Desert", SCREEN_WIDTH//30)
+    bouton_neige = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Neige", SCREEN_WIDTH//30)
+    bouton_foret = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Foret", SCREEN_WIDTH//30)
+    bouton_donjon = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Donjon", SCREEN_WIDTH//30)
 
     running = True
     while running:
 
         screen.blit(fond_image, (0, 0))
-        draw_text("Choisissez votre map !", 110, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
+        draw_text("Choisissez votre map !", SCREEN_WIDTH//12, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
 
         mx, my = pygame.mouse.get_pos()
-
-        
-        bouton_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-        bouton_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//10), pygame.SRCALPHA)
-
-
-        bouton_1.fill(BROWN_TR if not bouton_1_survole else BROWN)
-        bouton_2.fill(BROWN_TR if not bouton_2_survole else BROWN)
-        bouton_3.fill(BROWN_TR if not bouton_3_survole else BROWN)
-        bouton_4.fill(BROWN_TR if not bouton_4_survole else BROWN)
-        
-
-        screen.blit(bouton_1, ((SCREEN_WIDTH*0.12) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_2, ((SCREEN_WIDTH*0.373) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_3, ((SCREEN_WIDTH*0.626) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        screen.blit(bouton_4, ((SCREEN_WIDTH*0.88) - (SCREEN_WIDTH//5/2), SCREEN_HEIGHT*(0.65)))
-        
-
-        draw_text("Desert", 51, SCREEN_WIDTH*0.12, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Neige", 51, SCREEN_WIDTH*0.373, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Foret", 51, SCREEN_WIDTH*0.626, SCREEN_HEIGHT*(0.655), BLACK)
-        draw_text("Donjon", 51, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*(0.655), BLACK)
-
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
-                bouton_1_survole = bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_2_survole = bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_3_survole = bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
-                bouton_4_survole = bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my))
+                bouton_desert.hovered = bouton_desert.est_survol(mx, my)
+                bouton_neige.hovered = bouton_neige.est_survol(mx, my)
+                bouton_foret.hovered = bouton_foret.est_survol(mx, my)
+                bouton_donjon.hovered = bouton_donjon.est_survol(mx, my)
+
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_1.get_rect(center=((SCREEN_WIDTH*0.12), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+                if bouton_desert.est_survol(mx, my):
                     affichageGraphique(0, graphe, joueurs_choix)
                     running = False
-                if bouton_2.get_rect(center=((SCREEN_WIDTH*0.373), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_neige.est_survol(mx, my):
                     affichageGraphique(1, graphe, joueurs_choix)
                     running = False
-                if bouton_3.get_rect(center=((SCREEN_WIDTH*0.626), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)):
+
+                if bouton_foret.est_survol(mx, my):
                     affichageGraphique(2, graphe, joueurs_choix)
                     running = False
-                if bouton_4.get_rect(center=((SCREEN_WIDTH*0.88), (SCREEN_HEIGHT*(0.65) + SCREEN_HEIGHT//10/2))).collidepoint((mx, my)) :
+
+                if bouton_donjon.est_survol(mx, my):
                     affichageGraphique(3, graphe, joueurs_choix)
                     running = False
 
+        bouton_desert.bouton_actuelle = bouton_desert.bouton_survol if bouton_desert.hovered else bouton_desert.bouton_normale
+        bouton_neige.bouton_actuelle = bouton_neige.bouton_survol if bouton_neige.hovered else bouton_neige.bouton_normale
+        bouton_foret.bouton_actuelle = bouton_foret.bouton_survol if bouton_foret.hovered else bouton_foret.bouton_normale
+        bouton_donjon.bouton_actuelle = bouton_donjon.bouton_survol if bouton_donjon.hovered else bouton_donjon.bouton_normale
 
-
-        pygame.display.update()
+        bouton_desert.dessiner(screen)
+        bouton_neige.dessiner(screen)
+        bouton_foret.dessiner(screen)
+        bouton_donjon.dessiner(screen)
+           
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
 
 
 def regles():
@@ -913,7 +840,6 @@ def main_menu():
            
         pygame.display.flip()
         pygame.time.Clock().tick(FPS)
-
 
 if __name__ == "__main__":
     main_menu()

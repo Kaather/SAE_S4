@@ -31,10 +31,6 @@ font = pygame.font.Font(font_path, 30)
 # Utiliser la police pour afficher du texte
 texte_surface = font.render("Votre texte", True, BLACK)
 
-vitesse_fond = 5 # Vitesse de déplacement du fond
-
-current_player = 0
-
 largeur = 11
 hauteur = 11
 
@@ -44,6 +40,7 @@ joueurs_choix = []
 
 class Rectangle:
     """Classe qui va permettre de créer des rectangles sur pygame"""
+    
     def __init__(self, color, x, y, width, height):
         self.color = color
         self.rect = pygame.Rect(x, y, width, height)
@@ -53,12 +50,57 @@ class Rectangle:
 
 class Point:
     """Classe qui représente un point"""
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
     def draw(self, color, radius, offset_x=0, offset_y=0):
         pygame.draw.circle(screen, color, (self.x + offset_x, self.y + offset_y), radius)
+
+class BarreVie:
+    """Classe qui représente une barre de vie dynamique"""
+
+    def __init__(self, x, y, pv_max, is_monster=False):
+        self.x = x
+        self.y = y
+        self.pv = pv_max  # Initialiser les points de vie au maximum au début
+        self.pv_max = pv_max
+        self.is_monster = is_monster
+
+    def afficher_barre_vie(self, screen, total_players=1):
+        # Texte pour afficher les points de vie
+        if self.is_monster:
+            pv_text = f"PV: {self.pv * total_players} / {self.pv_max * total_players}"
+        else:
+            pv_text = f"PV: {self.pv} / {self.pv_max}"
+
+        font = pygame.font.Font(font_path, SCREEN_WIDTH//70)
+        pv_text_render = font.render(pv_text, True, BLACK)
+        screen.blit(pv_text_render, (self.x - SCREEN_WIDTH//10, self.y + SCREEN_WIDTH//400))
+
+        # Rectangle pour la barre de vie
+        barre_width = int((SCREEN_WIDTH // 8.2) * (self.pv * total_players) / (self.pv_max * total_players)) if self.is_monster else int((SCREEN_WIDTH // 8.2) * self.pv / self.pv_max)
+        rectangle_vert = pygame.Surface((barre_width, SCREEN_HEIGHT // 30), pygame.SRCALPHA)
+        rectangle_vert.fill(GREEN)
+        screen.blit(rectangle_vert, (self.x, self.y))
+
+        # Morceaux de la barre
+        morc_rectangle1 = pygame.Surface((SCREEN_WIDTH // 8, SCREEN_HEIGHT // 150), pygame.SRCALPHA)
+        morc_rectangle1.fill(BLACK)
+        screen.blit(morc_rectangle1, (self.x, self.y))
+
+        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH // 8, SCREEN_HEIGHT // 150), pygame.SRCALPHA)
+        morc_rectangle2.fill(BLACK)
+        screen.blit(morc_rectangle2, (self.x, self.y + SCREEN_WIDTH//60))
+
+        morc_rectangle3 = pygame.Surface((SCREEN_WIDTH // 300, SCREEN_HEIGHT // 30), pygame.SRCALPHA)
+        morc_rectangle3.fill(BLACK)
+        screen.blit(morc_rectangle3, (self.x, self.y))
+
+        morc_rectangle4 = pygame.Surface((SCREEN_WIDTH // 300, SCREEN_HEIGHT // 30), pygame.SRCALPHA)
+        morc_rectangle4.fill(BLACK)
+        screen.blit(morc_rectangle4, (self.x + barre_width, self.y))
 
 
 # Fonctions pour afficher le texte
@@ -326,13 +368,14 @@ def combat(attaque_choisi, joueur, monstre) :
     else :
         monstre_attaque(joueur, monstre)
 
-
-
 if __name__ == '__main__' :
 
     rectangle1 = Rectangle((BLACK), 50, 50, 20, 5)
     rectangle2 = Rectangle((BLACK), 200, 200, 5, 20)
     pointRouge = Point(100,200)
+
+    barre_joueur = BarreVie(350, 50, 100)
+    barre_monstre = BarreVie(550, 450, 150, True)
 
     while True:
         for event in pygame.event.get():
@@ -340,8 +383,11 @@ if __name__ == '__main__' :
                 pygame.quit()
                 sys.exit()
 
-        background_image = pygame.image.load('img/map/mapForest.png').convert()
+        background_image = pygame.image.load('img/map/foret.png').convert()
         background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+        barre_joueur.afficher_barre_vie(screen)
+        barre_monstre.afficher_barre_vie(screen, 2)
         
         rectangle1.draw()
         rectangle2.draw()
