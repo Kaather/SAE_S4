@@ -267,7 +267,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                     if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):
 
-                        nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                        verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers])
                             
                         joueurs_choix[compteur_lancers].position = case
 
