@@ -13,8 +13,6 @@ info = pygame.display.Info()
 
 # Définir les dimensions de la fenêtre
 SCREEN_WIDTH, SCREEN_HEIGHT = info.current_w, info.current_h
-# SCREEN_WIDTH, SCREEN_HEIGHT = 760, 520
-# SCREEN_WIDTH, SCREEN_HEIGHT = 760, 520
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("Labyrinthe")
 clock = pygame.time.Clock()
@@ -22,8 +20,6 @@ FPS = 60
  
 
 def affichageGraphique(choix, graphe, joueurs_choix) :
-    nb_argent = 0
-    nb_potion = 0
     argent_positions = []
     potion_positions = []
 
@@ -47,7 +43,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     screen.blit(fond_image, (0, 0))
 
-    bouton_quitter_survole = False
     lancer_fait = False
     de_resultat = None
     potion_possible = False
@@ -56,7 +51,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     ouvrir_piege_doree = False
     ouvrir_shop = False
     shopping = False
-    
 
     monstre_battu = 0
 
@@ -72,6 +66,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     piege_positions, piege_doree_positions, piege_images, piege_doree_image, shop_positions, shop_image = evenement(graphe)
 
     potion_positions, potion_images, argent_positions, argent_images = ajouter_objet(graphe, piege_positions, piege_doree_positions, shop_positions)
+
+    bouton_quitter = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Quitter", SCREEN_WIDTH//45)
 
     running = True
     while running:
@@ -126,12 +122,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         
         mx, my = pygame.mouse.get_pos()
 
-        bouton_quitter = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-        bouton_quitter.fill(TRANSPARENT if not bouton_quitter_survole else BROWN)
-        screen.blit(bouton_quitter, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-        draw_text("Quitter", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//(-120), BLACK)
-
-
         afficherJoueursLaby(joueurs_choix)
 
         # Affichage du menu stats / objet d'un joueur
@@ -141,36 +131,13 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         screen.blit(fond_player, ((SCREEN_WIDTH*0.001), SCREEN_HEIGHT*(0.001)))
         draw_text(f"Joueur {compteur_lancers + 1} :", SCREEN_WIDTH//25, SCREEN_WIDTH*0.09, SCREEN_HEIGHT*0.01, BLACK)
 
-        # Affichage point de vie
-
-        draw_text(f"PV : {joueurs_choix[compteur_lancers].pv} / {joueurs_choix[compteur_lancers].pv_max}", SCREEN_WIDTH//70, SCREEN_WIDTH*0.05, SCREEN_HEIGHT*0.12, BLACK)
-
-        # Rectangles pour afficher une barre de vie
-
-        rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (joueurs_choix[compteur_lancers].pv) // joueurs_choix[compteur_lancers].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        rectangle_vert.fill(GREEN)
-        screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.103), SCREEN_HEIGHT*(0.12)))
-
-        morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-        morc_rectangle1.fill(BLACK)
-        screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-        morc_rectangle2.fill(BLACK)
-        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.15)))
-
-        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        morc_rectangle2.fill(BLACK)
-        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        morc_rectangle2.fill(BLACK)
-        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.222), SCREEN_HEIGHT*(0.12)))
 
         if not lancer_fait:  
             de, cases_accessibles = dice(graphe, joueurs_choix[compteur_lancers])   
             de_resultat = de
             lancer_fait = True
+
+        barre_joueur = BarreVie(SCREEN_WIDTH//9.5, SCREEN_HEIGHT//8, joueurs_choix[compteur_lancers].pv, joueurs_choix[compteur_lancers].pv_max)
 
         # Affichage statistiques et objets
 
@@ -242,21 +209,21 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             pointRouge.draw((RED), (SCREEN_HEIGHT//150))
 
 
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
                 
             if event.type == pygame.MOUSEMOTION:
+
                 mx, my = pygame.mouse.get_pos()
-                bouton_quitter_survole = bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my))
-                
+                bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
+     
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+
+                if bouton_quitter.est_survol(mx, my):
                     running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = pygame.mouse.get_pos()
 
                 for case in cases_accessibles:
@@ -317,11 +284,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     shop_map_image = pygame.transform.scale(shop_map_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
                     screen.blit(shop_map_image, (0, 0))
                     
-                    bouton_quitter = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-                    bouton_quitter.fill(TRANSPARENT if not bouton_quitter_survole else BROWN)
-                    screen.blit(bouton_quitter, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-                    draw_text("Quitter", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//(-120), BLACK)
-
                     bouton_sortir_shop = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
                     bouton_sortir_shop.fill(TRANSPARENT if not bouton_sortir_shop_survole else BROWN)
                     screen.blit(bouton_sortir_shop, ((SCREEN_WIDTH*0.92, SCREEN_HEIGHT//22)))
@@ -384,10 +346,10 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         
                         if event.type == pygame.MOUSEMOTION: 
                             mx, my = pygame.mouse.get_pos()
-                            bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+                            bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
 
                         if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+                            if bouton_quitter.est_survol(mx, my):
                                 shopping = False
 
                         if event.type == pygame.MOUSEMOTION: 
@@ -397,7 +359,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             if bouton_sortir_shop.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT//16)).collidepoint((mx, my)):
-                                compteur_lancers += 1
                                 shopping = False
 
                         if joueurs_choix[compteur_lancers].argent >= 300 :
@@ -444,14 +405,18 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                                     joueurs_choix[compteur_lancers].argent -= 100
                                     bouton_achat_4_survole = False
 
-                    pygame.display.update()
-                    clock.tick(FPS)
+                    bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
 
+                    bouton_quitter.dessiner(screen)
+
+                    pygame.display.flip()
+                    pygame.time.Clock().tick(FPS)
+
+                compteur_lancers += 1
                 if compteur_lancers >= len(joueurs_choix):
                             compteur_lancers = 0
-                            
-                lancer_fait = False
 
+                lancer_fait = False
                 ouvrir_shop = False
                 
 
@@ -460,9 +425,15 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                 combatMonstre.combatMonstre(joueurs_choix, dragon, 0, monstre_battu, choix)
                 sys.exit()
 
-        pygame.display.update()
 
-        clock.tick(FPS)
+        bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
+
+        bouton_quitter.dessiner(screen)
+
+        barre_joueur.afficher_barre_vie(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
 
 if __name__ == "__main__":
 
