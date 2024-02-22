@@ -247,6 +247,14 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
+            if event.type == pygame.MOUSEMOTION:
+                mx, my = pygame.mouse.get_pos()
+                bouton_quitter_survole = bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my))
+                
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+                    running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = pygame.mouse.get_pos()
