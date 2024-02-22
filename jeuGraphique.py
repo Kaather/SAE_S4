@@ -393,9 +393,11 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         if event.type == pygame.MOUSEMOTION: 
                             mx, my = pygame.mouse.get_pos()
                             bouton_sortir_shop_survole = bouton_sortir_shop.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT//16)).collidepoint((mx, my))
+                            
 
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             if bouton_sortir_shop.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT//16)).collidepoint((mx, my)):
+                                compteur_lancers += 1
                                 shopping = False
 
                         if joueurs_choix[compteur_lancers].argent >= 300 :
@@ -445,11 +447,13 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     pygame.display.update()
                     clock.tick(FPS)
 
-                ouvrir_shop = False
-
-                compteur_lancers += 1  
                 if compteur_lancers >= len(joueurs_choix):
-                    compteur_lancers = 0
+                            compteur_lancers = 0
+                            
+                lancer_fait = False
+
+                ouvrir_shop = False
+                
 
             # Combat final        
             if ouvrir_piege_doree :
@@ -465,5 +469,6 @@ if __name__ == "__main__":
     choix = 2
     graphe = None
     joueurs_choix = []
-    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))            
+    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
+    joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
     affichageGraphique(choix, graphe, joueurs_choix) 
