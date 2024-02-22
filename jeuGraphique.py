@@ -70,7 +70,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
     while running:
 
-        barre_joueur = BarreVie(SCREEN_HEIGHT/5.4, SCREEN_HEIGHT//8, joueurs_choix[compteur_lancers].pv_max)
+        barre_joueur = BarreVie(SCREEN_HEIGHT/5.4, SCREEN_HEIGHT//8, joueurs_choix[compteur_lancers].pv, joueurs_choix[compteur_lancers].pv_max)
 
         rectangles = []
 
@@ -137,31 +137,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         draw_text(f"Joueur {compteur_lancers + 1} :", SCREEN_WIDTH//25, SCREEN_WIDTH*0.09, SCREEN_HEIGHT*0.01, BLACK)
 
         # Affichage point de vie
-
-        
-        # draw_text(f"PV : {joueurs_choix[compteur_lancers].pv} / {joueurs_choix[compteur_lancers].pv_max}", SCREEN_WIDTH//70, SCREEN_WIDTH*0.05, SCREEN_HEIGHT*0.12, BLACK)
-
-        # # Rectangles pour afficher une barre de vie
-
-        # rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (joueurs_choix[compteur_lancers].pv) // joueurs_choix[compteur_lancers].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        # rectangle_vert.fill(GREEN)
-        # screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.103), SCREEN_HEIGHT*(0.12)))
-
-        # morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-        # morc_rectangle1.fill(BLACK)
-        # screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-        # morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-        # morc_rectangle2.fill(BLACK)
-        # screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.15)))
-
-        # morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        # morc_rectangle2.fill(BLACK)
-        # screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-        # morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-        # morc_rectangle2.fill(BLACK)
-        # screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.222), SCREEN_HEIGHT*(0.12)))
 
         barre_joueur.afficher_barre_vie(screen)
 
@@ -701,10 +676,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                 ouvrir_shop = False
 
-                compteur_lancers += 1  
-                if compteur_lancers >= len(joueurs_choix):
-                    compteur_lancers = 0
-
             # Combat final        
             if ouvrir_piege_doree :
 
@@ -1013,5 +984,6 @@ if __name__ == "__main__":
     choix = 2
     graphe = None
     joueurs_choix = []
-    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))            
+    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))      
+    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Mage.png"))        
     affichageGraphique(choix, graphe, joueurs_choix) 

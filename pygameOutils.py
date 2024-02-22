@@ -61,10 +61,10 @@ class Point:
 class BarreVie:
     """Classe qui représente une barre de vie dynamique"""
 
-    def __init__(self, x, y, pv_max, is_monster=False):
+    def __init__(self, x, y, pv, pv_max, is_monster=False):
         self.x = x
         self.y = y
-        self.pv = pv_max  # Initialiser les points de vie au maximum au début
+        self.pv = pv
         self.pv_max = pv_max
         self.is_monster = is_monster
 
@@ -100,7 +100,8 @@ class BarreVie:
 
         morc_rectangle4 = pygame.Surface((SCREEN_WIDTH // 300, SCREEN_HEIGHT // 30), pygame.SRCALPHA)
         morc_rectangle4.fill(BLACK)
-        screen.blit(morc_rectangle4, (self.x + barre_width, self.y))
+        screen.blit(morc_rectangle4, (self.x + SCREEN_WIDTH//8.2, self.y))
+
 
 
 # Fonctions pour afficher le texte
@@ -374,8 +375,8 @@ if __name__ == '__main__' :
     rectangle2 = Rectangle((BLACK), 200, 200, 5, 20)
     pointRouge = Point(100,200)
 
-    barre_joueur = BarreVie(350, 50, 100)
-    barre_monstre = BarreVie(550, 450, 150, True)
+    barre_joueur = BarreVie(350, 50, 100, 100)
+    barre_monstre = BarreVie(550, 450, 150, 150, True)
 
     while True:
         for event in pygame.event.get():
