@@ -368,6 +368,19 @@ def combat(attaque_choisi, joueur, monstre) :
         choix_attaque(attaque_choisi, joueur, monstre)
     else :
         monstre_attaque(joueur, monstre)
+        
+def soin(joueur, joueur_choix):
+    liste_joueur_manque_vie = []
+    for joueurs in joueur_choix:
+        if joueurs.pv < joueurs.pv_max:
+            liste_joueur_manque_vie.append(joueurs)
+    if liste_joueur_manque_vie != []:
+        num = random.randint(0, len(liste_joueur_manque_vie) - 1)            
+        liste_joueur_manque_vie[num].pv += joueur.magie//3
+        if liste_joueur_manque_vie[num].pv > liste_joueur_manque_vie[num].pv_max:
+            liste_joueur_manque_vie[num].pv = liste_joueur_manque_vie[num].pv_max
+    else:
+        pass
 
 if __name__ == '__main__' :
 
