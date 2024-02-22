@@ -5,6 +5,7 @@ from pygameOutils import *
 from labyrinthe import *
 from entite import *
 from bouton import *
+import combatMonstre
 
 pygame.init()
 
@@ -12,6 +13,8 @@ info = pygame.display.Info()
 
 # Définir les dimensions de la fenêtre
 SCREEN_WIDTH, SCREEN_HEIGHT = info.current_w, info.current_h
+# SCREEN_WIDTH, SCREEN_HEIGHT = 760, 520
+# SCREEN_WIDTH, SCREEN_HEIGHT = 760, 520
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("Labyrinthe")
 clock = pygame.time.Clock()
@@ -19,12 +22,16 @@ FPS = 60
  
 
 def affichageGraphique(choix, graphe, joueurs_choix) :
+    nb_argent = 0
+    nb_potion = 0
+    argent_positions = []
+    potion_positions = []
 
     fond = [
     'img/map/desert.png',  
     'img/map/neige.png',
     'img/map/foret.png',
-    'img/map/donjon.png'
+    'img/map/dongeon.png'
     ]
 
     liste_loup = []
@@ -67,10 +74,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     potion_positions, potion_images, argent_positions, argent_images = ajouter_objet(graphe, piege_positions, piege_doree_positions, shop_positions)
 
     running = True
-
     while running:
-
-        barre_joueur = BarreVie(SCREEN_HEIGHT/5.4, SCREEN_HEIGHT//8, joueurs_choix[compteur_lancers].pv, joueurs_choix[compteur_lancers].pv_max)
 
         rectangles = []
 
@@ -127,6 +131,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         screen.blit(bouton_quitter, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
         draw_text("Quitter", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//(-120), BLACK)
 
+
         afficherJoueursLaby(joueurs_choix)
 
         # Affichage du menu stats / objet d'un joueur
@@ -138,7 +143,29 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
         # Affichage point de vie
 
-        barre_joueur.afficher_barre_vie(screen)
+        draw_text(f"PV : {joueurs_choix[compteur_lancers].pv} / {joueurs_choix[compteur_lancers].pv_max}", SCREEN_WIDTH//70, SCREEN_WIDTH*0.05, SCREEN_HEIGHT*0.12, BLACK)
+
+        # Rectangles pour afficher une barre de vie
+
+        rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (joueurs_choix[compteur_lancers].pv) // joueurs_choix[compteur_lancers].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
+        rectangle_vert.fill(GREEN)
+        screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.103), SCREEN_HEIGHT*(0.12)))
+
+        morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
+        morc_rectangle1.fill(BLACK)
+        screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
+
+        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
+        morc_rectangle2.fill(BLACK)
+        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.15)))
+
+        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
+        morc_rectangle2.fill(BLACK)
+        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
+
+        morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
+        morc_rectangle2.fill(BLACK)
+        screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.222), SCREEN_HEIGHT*(0.12)))
 
         if not lancer_fait:  
             de, cases_accessibles = dice(graphe, joueurs_choix[compteur_lancers])   
@@ -232,7 +259,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                     if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):
 
-                        verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers])
+                        nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
                             
                         joueurs_choix[compteur_lancers].position = case
 
@@ -258,277 +285,13 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         potion_possible = False
                     
             if joueurs_piegee == True :
-
-                compteur = 5
-                while compteur >= 1 :
-                  
-                    fond_image2 = pygame.image.load(fond[choix]).convert()
-                    fond_image2 = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-                    screen.blit(fond_image2, (0, 0))
-                    draw_text(f"Un joueur est tombé sur un piège !", SCREEN_WIDTH//16, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-                    draw_text(f"Rassemblez vous et préparez vous au combat !", SCREEN_WIDTH//22, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.45, BLACK)
-                    draw_text(f"{compteur}", SCREEN_WIDTH//13, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BLACK)
-
-                    fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                    fond_chargement.fill(WHITE_TR)
-                    screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
-
-                    pygame.display.update()
-                    clock.tick(FPS)
-                    pygame.time.delay(1000)
-                    compteur -= 1
-
-                bouton_menu_survole = False
-                bouton_potion_survole = False
-                bouton_attaque_survole = False
-                bouton_attaque_puissante_survole = False
-                bouton_attaque_magique_survole = False
-                en_combat = True
+                for joueur in joueurs_choix:
+                    joueur.position = case
+                combatMonstre.combatMonstre(joueurs_choix, liste_loup[compteur_loup], 0, monstre_battu, choix)
+                joueurs_piegee = False
                 compteur_lancers = 0
-                joueur_mort = False
-                monstre_mort = False
-                while en_combat and joueurs_piegee :         
-
-                    if compteur_lancers >= len(joueurs_choix):
-                        compteur_lancers = 0
-
-                    mx, my = pygame.mouse.get_pos()
-
-                    combat_image = pygame.image.load('img/map/mapPiege.png').convert()
-                    combat_image = pygame.transform.scale(combat_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-                    screen.blit(combat_image, (0, 0))
-
-                    bouton_quitter = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-                    bouton_quitter.fill(TRANSPARENT if not bouton_quitter_survole else BROWN)
-                    screen.blit(bouton_quitter, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-                    draw_text("Quitter", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//(-120), BLACK)
-                    
-                    # Affichage du monstre
-                    loup_image = pygame.image.load(liste_loup[compteur_loup].image).convert_alpha()
-                    loup_image = pygame.transform.scale(loup_image, (SCREEN_WIDTH//8, SCREEN_WIDTH//8))
-                    screen.blit(loup_image, (SCREEN_WIDTH*0.65, SCREEN_HEIGHT*0.4))
-
-                    # Affichage vie monstre
-
-                    draw_text(f"PV : {liste_loup[compteur_loup].pv*len(joueurs_choix)} / {liste_loup[compteur_loup].pv_max*len(joueurs_choix)}", SCREEN_WIDTH//65, SCREEN_WIDTH*0.64, SCREEN_HEIGHT*0.65, BLACK)
-
-                    rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (liste_loup[compteur_loup].pv) // liste_loup[compteur_loup].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    rectangle_vert.fill(GREEN)
-                    screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.703), SCREEN_HEIGHT*(0.65)))
-
-                    morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle1.fill(BLACK)
-                    screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.7), SCREEN_HEIGHT*(0.65)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.7), SCREEN_HEIGHT*(0.68)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.7), SCREEN_HEIGHT*(0.65)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.822), SCREEN_HEIGHT*(0.65)))
-
-                    # Affichage joueurs 
-                    quotient_x = 0.4
-                    quotient_y = 0.55
-                    for joueur in joueurs_choix :
-                        
-                        joueur_image = pygame.image.load(joueur.image).convert_alpha()
-                        joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//16, SCREEN_WIDTH//16))
-                        screen.blit(joueur_image, (SCREEN_WIDTH*quotient_x, SCREEN_HEIGHT*quotient_y))
-                        if quotient_x == 0.4 :
-                            quotient_x = 0.5
-                        else :
-                            quotient_x = 0.4
-
-                        if quotient_y == 0.55:
-                            quotient_y = 0.7
-                        elif quotient_y == 0.7:
-                            quotient_y = 0.4
-                        elif quotient_y == 0.4:
-                            quotient_y = 0.25
-                        elif quotient_y == 0.25:
-                            quotient_y = 0.55
-
-                    # Affichage stats / objets du joueurs courant
-
-                    fond_player = pygame.Surface((SCREEN_WIDTH//4.3, SCREEN_HEIGHT), pygame.SRCALPHA)
-                    fond_player.fill(WHITE_TR)
-                    screen.blit(fond_player, ((SCREEN_WIDTH*0.001), SCREEN_HEIGHT*(0.001)))
-                    draw_text(f"Joueur {compteur_lancers + 1} :", SCREEN_WIDTH//25, SCREEN_WIDTH*0.09, SCREEN_HEIGHT*0.01, BLACK)
-
-                    # Affichage point de vie
-
-                    draw_text(f"PV : {joueurs_choix[compteur_lancers].pv} / {joueurs_choix[compteur_lancers].pv_max}", SCREEN_WIDTH//65, SCREEN_WIDTH*0.05, SCREEN_HEIGHT*0.12, BLACK)
-
-                    # Rectangles pour afficher une barre de vie
-                    rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (joueurs_choix[compteur_lancers].pv) // joueurs_choix[compteur_lancers].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    rectangle_vert.fill(GREEN)
-                    screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.103), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle1.fill(BLACK)
-                    screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.15)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.222), SCREEN_HEIGHT*(0.12)))
-
-                    # Affichage statistiques et objets
-                    draw_text(f"Attaque  :   {joueurs_choix[compteur_lancers].attaque}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.2, BLACK)
-                    draw_text(f"Magie   :   {joueurs_choix[compteur_lancers].magie}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.3, BLACK)
-                    draw_text(f"Vitesse   :   {joueurs_choix[compteur_lancers].vitesse}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.4, BLACK)
-                    draw_text(f"Potion   :   {joueurs_choix[compteur_lancers].potion}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.5, BLACK)
-                    draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.6, BLACK)
-
-                    # Affichage des boutons de compétences / utilisables (potions)
-                    bouton_attaque = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque.fill(GREY_TR if not bouton_attaque_survole else GREY)
-                    screen.blit(bouton_attaque, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.355))
-                    draw_text("Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.355, BLACK)
-
-                    bouton_attaque_puissante = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque_puissante.fill(GREY_TR if not bouton_attaque_puissante_survole else GREY)
-                    screen.blit(bouton_attaque_puissante, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.555))
-                    draw_text("Attaque puissante", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.555, BLACK)
-
-                    bouton_attaque_magique = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque_magique.fill(GREY_TR if not bouton_attaque_magique_survole else GREY)
-                    screen.blit(bouton_attaque_magique, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.755))
-                    draw_text("Attaque magique", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.755, BLACK)
-
-                    # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
-                    if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
-                        bouton_potion = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                        bouton_potion.fill(GREY_TR if not bouton_potion_survole else GREY)
-                        screen.blit(bouton_potion, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.155))
-                        draw_text("Boire potion", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.155, BLACK)
-                        potion_possible = True
-
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
-                        
-                        if potion_possible == True :
-
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_potion_survole = bouton_potion.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185))).collidepoint((mx, my))
-
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_potion.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185)).collidepoint((mx, my)):
-                                    joueurs_choix[compteur_lancers].utiliser_potion()
-                                    compteur_lancers += 1                                 
-                                    potion_possible = False
-                                    
-
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_attaque_survole = bouton_attaque.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385))).collidepoint((mx, my))
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)):
-                                combat(1, joueurs_choix[compteur_lancers], liste_loup[compteur_loup])
-                                if comparaison_vitesse(joueurs_choix[compteur_lancers], liste_loup[compteur_loup]) :
-                                    if liste_loup[compteur_loup].pv <= 0 :
-                                        monstre_battu += 1
-                                        compteur_loup += 1
-                                        monstre_mort = True
-
-                                    else :
-                                        monstre_attaque(joueurs_choix[compteur_lancers], liste_loup[compteur_loup])
-                                        if joueurs_choix[compteur_lancers].pv <= 0 :
-                                            joueur_mort = True
-
-                                else :
-                                    if joueurs_choix[compteur_lancers].pv <= 0 :
-                                            joueur_mort = True
-
-                                    else :
-                                        attaque(joueurs_choix[compteur_lancers], liste_loup[compteur_loup])
-                                        if liste_loup[compteur_loup].pv <= 0 :
-                                            monstre_battu += 1
-                                            compteur_loup += 1
-                                            monstre_mort = True
-
-                                if joueur_mort :
-
-                                    menu_mort = True
-                                    while menu_mort :
-                                        mx, my = pygame.mouse.get_pos()
-                                        screen.blit(fond_image, (0, 0))
-                                        draw_text("Vous avez perdu !", SCREEN_WIDTH//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-
-                                        bouton_menu = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
-                                        bouton_menu.fill(BROWN_TR if not bouton_menu_survole else BROWN)
-                                        screen.blit(bouton_menu, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.8)))
-                                        draw_text("Quitter", SCREEN_WIDTH//20, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.775) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-
-                                        for event in pygame.event.get():
-                                            if event.type == pygame.QUIT:
-                                                pygame.quit()
-                                                sys.exit()
-
-                                            if event.type == pygame.MOUSEMOTION: 
-                                                mx, my = pygame.mouse.get_pos()
-                                                bouton_menu_survole = bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-
-                                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                                if bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)) :
-                                                    joueurs_choix.clear()   
-                                                    supprimer_classes()
-                                                    running = False
-                                                    en_combat = False
-                                                    menu_mort = False
-
-                                        pygame.display.update()
-                                        clock.tick(FPS)
-                                
-                                elif monstre_mort :
-                                    for joueur in joueurs_choix:
-                                        joueur.position = case
-                                    compteur_lancers += 1
-                                    joueurs_piegee = False
-                                    en_combat = False
-
-                                else :
-                                    compteur_lancers += 1
-
-
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
-                                joueurs_choix.clear()   
-                                supprimer_classes()
-                                running = False                       
-                                en_combat = False
-
-                    pygame.display.update()
-                    clock.tick(FPS)
-                    
-                if compteur_lancers >= len(joueurs_choix):
-                    compteur_lancers = 0
+                compteur_loup += 1
+                monstre_battu += 1
             
             # Dans le shop
             bouton_sortir_shop_survole = False
@@ -676,314 +439,23 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                 ouvrir_shop = False
 
-            # Combat final        
-            if ouvrir_piege_doree :
-
-                compteur = 5
-                while compteur >= 1 :
-                  
-                    fond_image2 = pygame.image.load(fond[choix]).convert()
-                    fond_image2 = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-                    screen.blit(fond_image2, (0, 0))
-                    draw_text(f"Un joueur a ouvert la porte dorée !", SCREEN_WIDTH//17, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-                    draw_text(f"Rassemblez vous et préparez vous au combat final !", SCREEN_WIDTH//25, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.45, BLACK)
-                    draw_text(f"{compteur}", SCREEN_WIDTH//13, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BLACK)
-
-                    fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                    fond_chargement.fill(WHITE_TR)
-                    screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
-
-                    pygame.display.update()
-                    clock.tick(FPS)
-                    pygame.time.delay(1000)
-                    compteur -= 1
-
-                bouton_menu_survole = False
-                bouton_potion_survole = False
-                bouton_attaque_survole = False
-                bouton_attaque_puissante_survole = False
-                bouton_attaque_magique_survole = False
-                en_combat = True
-                compteur_lancers = 0
-                joueur_mort = False
-                monstre_mort = False
-                while en_combat and ouvrir_piege_doree :         
-
-                    if compteur_lancers >= len(joueurs_choix):
-                        compteur_lancers = 0
-
-                    mx, my = pygame.mouse.get_pos()
-
-                    combat_image = pygame.image.load('img/map/mapPiege.png').convert()
-                    combat_image = pygame.transform.scale(combat_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-                    screen.blit(combat_image, (0, 0))
-
-                    bouton_quitter = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-                    bouton_quitter.fill(TRANSPARENT if not bouton_quitter_survole else BROWN)
-                    screen.blit(bouton_quitter, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
-                    draw_text("Quitter", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//(-120), BLACK)
-                    
-                    # Affichage du monstre dragon utilise la variable dragon
-                    dragon_image = pygame.image.load(dragon.image).convert_alpha()
-                    dragon_image = pygame.transform.scale(dragon_image, (SCREEN_WIDTH//8, SCREEN_WIDTH//8))
-                    screen.blit(dragon_image, (SCREEN_WIDTH*0.65, SCREEN_HEIGHT*0.4))
-                    
-                    # Affichage vie monstre
-                    draw_text(f"PV : {dragon.pv} / {dragon.pv_max}", 20, SCREEN_WIDTH*0.64, SCREEN_HEIGHT*0.65, BLACK)          
-                    
-                    rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (dragon.pv) // dragon.pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    rectangle_vert.fill(GREEN)
-                    screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.703), SCREEN_HEIGHT*(0.65)))
-                    
-                
-                    # Affichage joueurs 
-                    quotient_x = 0.4
-                    quotient_y = 0.55
-                    for joueur in joueurs_choix :
-                        
-                        joueur_image = pygame.image.load(joueur.image).convert_alpha()
-                        joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//16, SCREEN_WIDTH//16))
-                        screen.blit(joueur_image, (SCREEN_WIDTH*quotient_x, SCREEN_HEIGHT*quotient_y))
-                        if quotient_x == 0.4 :
-                            quotient_x = 0.5
-                        else :
-                            quotient_x = 0.4
-
-                        if quotient_y == 0.55:
-                            quotient_y = 0.7
-                        elif quotient_y == 0.7:
-                            quotient_y = 0.4
-                        elif quotient_y == 0.4:
-                            quotient_y = 0.25
-                        elif quotient_y == 0.25:
-                            quotient_y = 0.55
-
-                    # Affichage stats / objets du joueurs courant
-
-                    fond_player = pygame.Surface((SCREEN_WIDTH//4.3, SCREEN_HEIGHT), pygame.SRCALPHA)
-                    fond_player.fill(WHITE_TR)
-                    screen.blit(fond_player, ((SCREEN_WIDTH*0.001), SCREEN_HEIGHT*(0.001)))
-                    draw_text(f"Joueur {compteur_lancers + 1} :", SCREEN_WIDTH//25, SCREEN_WIDTH*0.09, SCREEN_HEIGHT*0.01, BLACK)
-
-                    # Affichage point de vie
-
-                    draw_text(f"PV : {joueurs_choix[compteur_lancers].pv} / {joueurs_choix[compteur_lancers].pv_max}", SCREEN_WIDTH//65, SCREEN_WIDTH*0.05, SCREEN_HEIGHT*0.12, BLACK)
-
-                    # Rectangles pour afficher une barre de vie
-                    rectangle_vert = pygame.Surface((((SCREEN_WIDTH//8.2) * (joueurs_choix[compteur_lancers].pv) // joueurs_choix[compteur_lancers].pv_max), SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    rectangle_vert.fill(GREEN)
-                    screen.blit(rectangle_vert, ((SCREEN_WIDTH*0.103), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle1 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle1.fill(BLACK)
-                    screen.blit(morc_rectangle1, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//8, SCREEN_HEIGHT//150), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.15)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.1), SCREEN_HEIGHT*(0.12)))
-
-                    morc_rectangle2 = pygame.Surface((SCREEN_WIDTH//300, SCREEN_HEIGHT//30), pygame.SRCALPHA)
-                    morc_rectangle2.fill(BLACK)
-                    screen.blit(morc_rectangle2, ((SCREEN_WIDTH*0.222), SCREEN_HEIGHT*(0.12)))
-
-                    # Affichage statistiques et objets
-                    draw_text(f"Attaque  :   {joueurs_choix[compteur_lancers].attaque}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.2, BLACK)
-                    draw_text(f"Magie   :   {joueurs_choix[compteur_lancers].magie}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.3, BLACK)
-                    draw_text(f"Vitesse   :   {joueurs_choix[compteur_lancers].vitesse}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.4, BLACK)
-                    draw_text(f"Potion   :   {joueurs_choix[compteur_lancers].potion}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.5, BLACK)
-                    draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.6, BLACK)
-                    
-                    # Affichage des boutons de compétences / utilisables (potions)
-                    bouton_attaque = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque.fill(GREY_TR if not bouton_attaque_survole else GREY)
-                    screen.blit(bouton_attaque, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.355))
-                    draw_text("Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.355, BLACK)
-
-                    bouton_attaque_puissante = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque_puissante.fill(GREY_TR if not bouton_attaque_puissante_survole else GREY)
-                    screen.blit(bouton_attaque_puissante, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.555))
-                    draw_text("Attaque puissante", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.555, BLACK)
-
-                    bouton_attaque_magique = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                    bouton_attaque_magique.fill(GREY_TR if not bouton_attaque_magique_survole else GREY)
-                    screen.blit(bouton_attaque_magique, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.755))
-                    draw_text("Attaque magique", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.755, BLACK)
-
-                    # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
-                    if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
-                        bouton_potion = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-                        bouton_potion.fill(GREY_TR if not bouton_potion_survole else GREY)
-                        screen.blit(bouton_potion, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.155))
-                        draw_text("Boire potion", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.155, BLACK)
-                        potion_possible = True
-
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
-                        
-                        if potion_possible == True :
-
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_potion_survole = bouton_potion.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185))).collidepoint((mx, my))
-
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_potion.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185)).collidepoint((mx, my)):
-                                    joueurs_choix[compteur_lancers].utiliser_potion()
-                                    compteur_lancers += 1                                 
-                                    potion_possible = False
-                                    
-
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_attaque_survole = bouton_attaque.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385))).collidepoint((mx, my))
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)):
-                                combat(1, joueurs_choix[compteur_lancers], dragon)
-                                if comparaison_vitesse(joueurs_choix[compteur_lancers], dragon) :
-                                    if dragon.pv <= 0 :
-                                        boss_battu = True
-                                        monstre_mort = True
-
-                                    else :
-                                        monstre_attaque(joueurs_choix[compteur_lancers], dragon)
-                                        if joueurs_choix[compteur_lancers].pv <= 0 :
-                                            joueur_mort = True
-
-                                else :
-                                    if joueurs_choix[compteur_lancers].pv <= 0 :
-                                            joueur_mort = True
-
-                                    else :
-                                        attaque(joueurs_choix[compteur_lancers], dragon)
-                                        if dragon.pv <= 0 :
-                                            monstre_mort = True
-
-                                if joueur_mort :
-
-                                    menu_mort = True
-                                    while menu_mort :
-                                        mx, my = pygame.mouse.get_pos()
-                                        screen.blit(fond_image, (0, 0))
-                                        draw_text("Vous avez perdu !", SCREEN_WIDTH//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-
-                                        bouton_menu = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
-                                        bouton_menu.fill(BROWN_TR if not bouton_menu_survole else BROWN)
-                                        screen.blit(bouton_menu, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.8)))
-                                        draw_text("Quitter", SCREEN_WIDTH//20, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.775) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-
-                                        for event in pygame.event.get():
-                                            if event.type == pygame.QUIT:
-                                                pygame.quit()
-                                                sys.exit()
-
-                                            if event.type == pygame.MOUSEMOTION: 
-                                                mx, my = pygame.mouse.get_pos()
-                                                bouton_menu_survole = bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-
-                                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                                if bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)) :
-                                                    joueurs_choix.clear()   
-                                                    supprimer_classes()
-                                                    running = False
-                                                    en_combat = False
-                                                    menu_mort = False
-
-                                        pygame.display.update()
-                                        clock.tick(FPS)
-                                
-                                elif monstre_mort :
-                                    for joueur in joueurs_choix:
-                                        joueur.position = case
-                                    compteur_lancers += 1
-                                    joueurs_piegee = False
-                                    ouvrir_piege_doree = False
-                                    en_combat = False
-                                    running2 = True
-                                    while running2 :
-                                        mx, my = pygame.mouse.get_pos()
-                                        screen.blit(fond_image, (0, 0))
-                                        draw_text("Vous avez gagné !", SCREEN_WIDTH//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-                                        bouton_menu = pygame.Surface((SCREEN_WIDTH//4, SCREEN_HEIGHT//7.5), pygame.SRCALPHA)
-                                        bouton_menu.fill(BROWN_TR if not bouton_menu_survole else BROWN)
-                                        screen.blit(bouton_menu, ((SCREEN_WIDTH/2) - (SCREEN_WIDTH//4/2), SCREEN_HEIGHT*(0.8)))
-                                        draw_text("Quitter", SCREEN_WIDTH//20, SCREEN_WIDTH//2, (SCREEN_HEIGHT*(0.775) + (SCREEN_HEIGHT//7.5*0.3)), BLACK)
-
-                                        for event in pygame.event.get():
-                                            if event.type == pygame.QUIT:
-                                                pygame.quit()
-                                                sys.exit()
-
-                                            if event.type == pygame.MOUSEMOTION: 
-                                                mx, my = pygame.mouse.get_pos()
-                                                bouton_menu_survole = bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my))
-
-                                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                                if bouton_menu.get_rect(center=((SCREEN_WIDTH/2), SCREEN_HEIGHT*(0.8) + (SCREEN_HEIGHT//7.5*0.5))).collidepoint((mx, my)):
-                                                    running2 = False
-
-                                        pygame.display.update()
-                                        clock.tick(FPS)
-
-                                    joueurs_choix.clear()   
-                                    supprimer_classes()
-                                    running = False
-                                    
-                                    
-                                else :
-                                    compteur_lancers += 1
-
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
-                                joueurs_choix.clear()   
-                                supprimer_classes()
-                                running = False                       
-                                en_combat = False
-
-                    pygame.display.update()
-                    clock.tick(FPS)
-                    
+                compteur_lancers += 1  
                 if compteur_lancers >= len(joueurs_choix):
                     compteur_lancers = 0
-                
 
-            if event.type == pygame.MOUSEMOTION: 
-                mx, my = pygame.mouse.get_pos()
-                bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
-                    joueurs_choix.clear()   
-                    supprimer_classes()
-                    running = False
-
-
+            # Combat final        
+            if ouvrir_piege_doree :
+                combatMonstre.combatMonstre(joueurs_choix, dragon, 0, monstre_battu, choix)
+                sys.exit()
 
         pygame.display.update()
 
         clock.tick(FPS)
-
 
 if __name__ == "__main__":
 
     choix = 2
     graphe = None
     joueurs_choix = []
-    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))      
-    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Mage.png"))        
+    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))            
     affichageGraphique(choix, graphe, joueurs_choix) 
