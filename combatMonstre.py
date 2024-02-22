@@ -5,9 +5,9 @@ from pygameOutils import *
 from labyrinthe import *
 from entite import *
 from bouton import *
-from jeuGraphique import *
 
-
+clock = pygame.time.Clock()
+FPS = 60
 
 def combatMonstre(joueurs_choix, monstre, compteur_lancers, monstre_battu, choix):
     fond = [
