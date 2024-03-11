@@ -369,18 +369,30 @@ def combat(attaque_choisi, joueur, monstre) :
     else :
         monstre_attaque(joueur, monstre)
         
-def soin(joueur, joueur_choix):
-    liste_joueur_manque_vie = []
-    for joueurs in joueur_choix:
-        if joueurs.pv < joueurs.pv_max:
-            liste_joueur_manque_vie.append(joueurs)
-    if liste_joueur_manque_vie != []:
-        num = random.randint(0, len(liste_joueur_manque_vie) - 1)            
-        liste_joueur_manque_vie[num].pv += joueur.magie//3
-        if liste_joueur_manque_vie[num].pv > liste_joueur_manque_vie[num].pv_max:
-            liste_joueur_manque_vie[num].pv = liste_joueur_manque_vie[num].pv_max
-    else:
-        pass
+def soin(joueur):
+    joueur.pv = joueur.pv + 10
+    if joueur.pv > joueur.pv_max :
+        joueur.pv = joueur.pv_max
+        
+def appliquer_bonus(joueur, bonus) :
+    if bonus == "Attaque" :
+        joueur.attaque = joueur.attaque + 10
+    elif bonus == "Défense":
+        joueur.defense = joueur.defense + 10
+    elif bonus == "Magie":
+        joueur.magie = joueur.magie + 10
+    elif bonus == "Vitesse":
+        joueur.vitesse = joueur.vitesse + 10
+        
+def appliquer_malus(monstre, malus) :
+    if malus == "Attaque" :
+        monstre.attaque = monstre.attaque - 10
+    elif malus == "Défense":
+        monstre.defense = monstre.defense - 10
+    elif malus == "Magie":
+        monstre.magie = monstre.magie - 10
+    elif malus == "Vitesse":
+        monstre.vitesse = monstre.vitesse - 10
 
 if __name__ == '__main__' :
 
