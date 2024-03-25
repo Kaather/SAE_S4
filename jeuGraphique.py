@@ -7,6 +7,8 @@ from labyrinthe import *
 from entite import *
 from bouton import *
 import combatMonstre
+import time
+import statistique
 
 pygame.init()
 
@@ -23,6 +25,11 @@ FPS = 60
  
 
 def affichageGraphique(choix, graphe, joueurs_choix) :
+    duree = 0
+    monstre_tue = 0
+    nombre_tour = 0
+    # Calcul de la durée de la partie
+    time_start = time.time()
     nb_argent = 0
     nb_potion = 0
     argent_positions = []
@@ -274,10 +281,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     point_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 9.2)
 
 
-                    if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):
-
-                        verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers])
-                            
+                    if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):                           
+                        nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
                         joueurs_choix[compteur_lancers].position = case
 
                         if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
@@ -288,6 +293,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         compteur_lancers += 1
                         if compteur_lancers >= len(joueurs_choix):
                             compteur_lancers = 0
+                            nombre_tour += 1
                         lancer_fait = False
                         break
 
@@ -458,7 +464,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     clock.tick(FPS)
 
                 if compteur_lancers >= len(joueurs_choix):
-                            compteur_lancers = 0
+                    compteur_lancers = 0
+                    nombre_tour += 1
                             
                 lancer_fait = False
 
@@ -468,7 +475,21 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             # Combat final        
             if ouvrir_piege_doree :
                 choix_boss = random.choice(boss)
-                combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix)
+                if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix):
+                    # calcul de la durée total de la partie
+                    time_end = time.time()
+                    duree = time_end - time_start
+                    running = False
+                    partie_finie = True
+                    monstre_battu = 6
+                else:
+                    time_end = time.time()
+                    duree = time_end - time_start
+                    running = False   
+                    partie_finie = False
+                    
+                    
+                statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
                 sys.exit()
 
         pygame.display.update()

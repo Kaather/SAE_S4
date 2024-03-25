@@ -5,7 +5,7 @@ from entite import *
 import json
 import requests
 
-def mise_en_stat(joueurs_choix, monstre_tue, partie, nombre_tour, nombre_potion, nombre_argent, map, duree):
+def mise_en_stat(joueurs_choix, monstre_tue, partie, nombre_tour, map, duree, nombre_potion, nombre_argent):
     # mettre les joueurs dans un dict
     data = {}
     for i in range(len(joueurs_choix)):
@@ -66,12 +66,6 @@ if __name__ == "__main__":
     nombre_potion = 5
     nombre_argent = 100
     choix = 1
-    duree = 5
-    # graphes = [[(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)], [(10, 5), (5, 6), (6, 7)]]
-    # liste_position_argent = [(1,1), (2,2), (3,3)]
-    # liste_position_potion = [(4,4), (5,5), (6,6)]
-    # liste_position_piege = [(7,7), (8,8), (9,9)]
-    # liste_postion_joueur = [(10,10), (11,11), (12,12)]
-    
+    duree = 5    
     
     mise_en_stat(joueurs_choix, monstre_tue, partie, nombre_tour, nombre_potion, nombre_argent, choix, duree)

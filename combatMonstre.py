@@ -10,6 +10,10 @@ clock = pygame.time.Clock()
 FPS = 60
 
 def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
+    valeur_avant_combat = []
+    # stock les valeurs d'attaques, de magie et de vitesse de chaque joueur avant le combat
+    for joueur in joueurs_choix:
+        valeur_avant_combat.append([joueur.attaque, joueur.magie, joueur.vitesse])
     fond = [
         'img/map/desert.png',  
         'img/map/neige.png',
@@ -285,11 +289,12 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
 
                         if joueur_mort :
                             mort()
+                            return False
                         
                         elif monstre_mort :
                             if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
                                 gagne(fond_image)
-                                sys.exit()
+                                return True
                             else:
                                 compteur_lancers += 1
                                 en_combat = False
@@ -309,7 +314,7 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
                         fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
                         fond_chargement.fill(WHITE_TR)
                         screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-                        bonus_options = ['Défense', 'Attaque', 'Vitesse', 'Magie']
+                        bonus_options = ['Attaque', 'Vitesse', 'Magie']
 
                         # Calcul des positions initiales
                         bouton_width = SCREEN_WIDTH * 0.20
@@ -452,12 +457,12 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
                                     monstre_mort = True
 
                         if joueur_mort :
-                            mort()
+                            return False
                                 
                         elif monstre_mort :
                             if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
                                 gagne(fond_image)
-                                sys.exit()
+                                return True
                             else:
                                 compteur_lancers += 1
                                 en_combat = False
@@ -476,7 +481,7 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
                         fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
                         fond_chargement.fill(WHITE_TR)
                         screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-                        bonus_options = ['Défense', 'Attaque', 'Vitesse', 'Magie']
+                        bonus_options = ['Attaque', 'Vitesse', 'Magie']
 
                         # Calcul des positions initiales
                         bouton_width = SCREEN_WIDTH * 0.20
@@ -514,6 +519,7 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
                                         if bouton_rect.collidepoint((mx, my)):
                                             appliquer_malus(monstre, bonus_options[i])
                                             choixBonusFait = True
+                                            compteur_lancers += 1
 
                                 for i in range(len(bonus_options)):
                                     bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
@@ -553,14 +559,16 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
 
                         if joueur_mort :
                             mort()
+                            return False
                                 
                         elif monstre_mort :
                             if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
                                 gagne(fond_image)
-                                sys.exit()
+                                return True
                             else:
                                 compteur_lancers += 1
                                 en_combat = False
+                                
                             
                         else :
                             compteur_lancers += 1           
@@ -581,8 +589,20 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
         
     if compteur_lancers >= len(joueurs_choix):
         compteur_lancers = 0
+                
+    # remet la valeur par defaut pour l'attaque, la magie et la vitesse
+    for i, joueur in enumerate(joueurs_choix):
+        joueur.attaque = valeur_avant_combat[i][0]
+        joueur.magie = valeur_avant_combat[i][1]
+        joueur.vitesse = valeur_avant_combat[i][2]
+
+    return True
         
 def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers, choix):
+    valeur_avant_combat = []
+    for joueur in joueurs_choix:
+        valeur_avant_combat.append([joueur.attaque, joueur.magie, joueur.vitesse])
+        
     fond = [
         'img/map/desert.png',  
         'img/map/neige.png',
@@ -711,17 +731,26 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
         bouton_attaque = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
         bouton_attaque.fill(GREY_TR if not bouton_attaque_survole else GREY)
         screen.blit(bouton_attaque, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.355))
-        draw_text("Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.355, BLACK)
+        if joueurs_choix[compteur_lancers].nom == 'Healer':
+            draw_text("Soigner", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.355, BLACK)
+        else:
+            draw_text("Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.355, BLACK)
 
         bouton_attaque_puissante = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
         bouton_attaque_puissante.fill(GREY_TR if not bouton_attaque_puissante_survole else GREY)
         screen.blit(bouton_attaque_puissante, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.555))
-        draw_text("Attaque puissante", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.555, BLACK)
+        if joueurs_choix[compteur_lancers].nom == 'Healer':
+            draw_text("Booster", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.555, BLACK)
+        else:
+            draw_text("Attaque puissante", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.555, BLACK)
 
         bouton_attaque_magique = pygame.Surface((SCREEN_WIDTH*0.27, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
         bouton_attaque_magique.fill(GREY_TR if not bouton_attaque_magique_survole else GREY)
         screen.blit(bouton_attaque_magique, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.755))
-        draw_text("Attaque magique", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.755, BLACK)
+        if joueurs_choix[compteur_lancers].nom == 'Healer':
+            draw_text("Malus", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.755, BLACK)
+        else:
+            draw_text("Attaque magique", SCREEN_WIDTH//37, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.755, BLACK)
         
         # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
         if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max and numero == str(compteur_lancers + 1) :
@@ -758,48 +787,128 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
                 # attaque normale
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)):
-                        combat(1, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
-                                data["monstre_mort"] = monstre_mort
-                                data["joueur_mort"] = joueur_mort
-                                socket.send(str.encode(str(data)))
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            # Met un filtre blanc flou
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+
+                            
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons
+                            for i in range(len(joueurs_choix)):
+                                bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_joueur.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_joueur, (bouton_x, bouton_y))
+                                draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
                                 
-                            else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
-                                if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                                # affiche l'image du joueur au dessus du bouton
+                                joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
+                                joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
+                                screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
+                                
+                                
+                            # Attente de la sélection du joueur
+                            soinFait = True
+                            while soinFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(joueurs_choix)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                soinFait = False
+                                                # envoie des données au serveur
+                                                data = {}
+                                                data["healer"] = joueurs_choix[compteur_lancers].nom
+                                                data["choix"] = "soin"
+                                                data["joueur_choisi"] = i
+                                                compteur_lancers += 1
+                                                data["compteur_lancers"] = compteur_lancers
+                                                socket.send(str.encode(str(data)))
+                                                
+                                                
+                                    for i in range(len(joueurs_choix)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
 
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0:
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
 
-                            else :
-                                attaque(joueurs_choix[compteur_lancers], monstre)
+                                        draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un joueur à soigner", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
+                                    
+
+                                pygame.display.update()
+                                clock.tick(FPS)  
+                            soin(joueurs_choix[i])  
+                                       
+                        else:   
+                            combat(1, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
                                 if monstre.pv <= 0 :
                                     monstre_mort = True
                                     data["monstre_mort"] = monstre_mort
                                     data["joueur_mort"] = joueur_mort
                                     socket.send(str.encode(str(data)))
+                                    
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
 
-                        if joueur_mort :
-                            mort()
-                            socket.close()
-                            pygame.quit()
-                            sys.exit()                            
-                        
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image)
-                            else:
-                                en_combat = False  
+                            else :
+                                if joueurs_choix[compteur_lancers].pv <= 0:
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                                else :
+                                    attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                            if joueur_mort :
+                                mort()
+                                return False                         
+                            
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image)
+                                else:
+                                    en_combat = False  
+                                    for i, joueur in enumerate(joueurs_choix):
+                                        joueur.attaque = valeur_avant_combat[i][0]
+                                        joueur.magie = valeur_avant_combat[i][1]
+                                        joueur.vitesse = valeur_avant_combat[i][2]
+                                return True
                             
                 # attaque puissante   
                 if event.type == pygame.MOUSEMOTION:
@@ -808,49 +917,189 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
                                         
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if bouton_attaque_puissante.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585)).collidepoint((mx, my)):
-                        combat(1, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
-                                # envoie monstre mort
-                                data["monstre_mort"] = monstre_mort
-                                data["joueur_mort"] = joueur_mort
-                                socket.send(str.encode(str(data)))
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+                            bonus_options = ['Attaque', 'Vitesse', 'Magie']
+
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons pour les choix de bonus
+                            for i, option in enumerate(bonus_options):
+                                bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_bonus.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_bonus, (bouton_x, bouton_y))
+                                draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+
+                            # Attente de la sélection du bonus
+                            choixBonusFait = False
+                            while not choixBonusFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(bonus_options)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                bonus = bonus_options[i]
+                                                choixBonusFait = True
+
+                                    for i in range(len(bonus_options)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+
+                                        draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un bonus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
+
+                                pygame.display.update()
+                                clock.tick(FPS) 
+                            
+                            # Choisir le joueurs à booster
+                            # Met un filtre blanc flou
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+
+                            
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons
+                            for i in range(len(joueurs_choix)):
+                                bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_joueur.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_joueur, (bouton_x, bouton_y))
+                                draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
                                 
-                            else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
-                                if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                                # affiche l'image du joueur au dessus du bouton
+                                joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
+                                joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
+                                screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
+                                
+                                
+                            # Attente de la sélection du joueur
+                            joueurChoisi = True
+                            while joueurChoisi:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(joueurs_choix)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                
+                                                joueurChoisi = False
+                                                # envoie en réseau
+                                                data = {}
+                                                data["bonus"] = bonus
+                                                data["choix"] = "boost"
+                                                data["joueur_choisi"] = i
+                                                compteur_lancers += 1
+                                                data["compteur_lancers"] = compteur_lancers
+                                                socket.send(str.encode(str(data)))
+                                                
+                                                
+                                                
+                                    for i in range(len(joueurs_choix)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
 
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0:
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
 
-                            else :
-                                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+                                        draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un joueur à booster", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)  
+                                        
+                                pygame.display.update()
+                                clock.tick(FPS) 
+                            appliquer_bonus(joueurs_choix[i], bonus)
+                                    
+                        else:
+                            combat(1, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
                                 if monstre.pv <= 0 :
                                     monstre_mort = True
+                                    # envoie monstre mort
                                     data["monstre_mort"] = monstre_mort
                                     data["joueur_mort"] = joueur_mort
                                     socket.send(str.encode(str(data)))
+                                    
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
 
-                        if joueur_mort :
-                            mort()
-                            socket.close()
-                            pygame.quit()
-                            sys.exit()
-                            
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image)
-                            else:
-                                en_combat = False                        
+                            else :
+                                if joueurs_choix[compteur_lancers].pv <= 0:
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                                else :
+                                    attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                            if joueur_mort :
+                                mort()
+                                return False
+                                
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image)
+                                else:
+                                    en_combat = False  
+                                    for i, joueur in enumerate(joueurs_choix):
+                                        joueur.attaque = valeur_avant_combat[i][0]
+                                        joueur.magie = valeur_avant_combat[i][1]
+                                        joueur.vitesse = valeur_avant_combat[i][2]    
+                                return True               
 
 
                 if event.type == pygame.MOUSEMOTION: 
@@ -864,49 +1113,120 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
                     
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if bouton_attaque_magique.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785)).collidepoint((mx, my)):
-                        combat(1, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
-                                # envoie monstre mort
-                                data["monstre_mort"] = monstre_mort
-                                data["joueur_mort"] = joueur_mort
-                                socket.send(str.encode(str(data)))
-                                
-                            else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
-                                if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+                            bonus_options = ['Attaque', 'Vitesse', 'Magie']
 
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0:
-                                    joueur_mort = True
-                                    data["monstre_mort"] = monstre_mort
-                                    data["joueur_mort"] = joueur_mort
-                                    socket.send(str.encode(str(data)))
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
 
-                            else :
-                                attaque_magique(joueurs_choix[compteur_lancers], monstre)
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons pour les choix de bonus
+                            for i, option in enumerate(bonus_options):
+                                bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_bonus.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_bonus, (bouton_x, bouton_y))
+                                draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+
+                            # Attente de la sélection du bonus
+                            choixBonusFait = False
+                            while not choixBonusFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(bonus_options)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                choixBonusFait = True
+                                                # envoie en réseau
+                                                data = {}
+                                                data["Healer"] = joueurs_choix[compteur_lancers].nom
+                                                data["malus"] = bonus_options[i]
+                                                data["choix"] = "malus"
+                                                compteur_lancers += 1
+                                                data["compteur_lancers"] = compteur_lancers
+                                                socket.send(str.encode(str(data)))
+                                                
+                                    for i in range(len(bonus_options)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+
+                                        draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un malus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
+
+                                pygame.display.update()
+                                clock.tick(FPS) 
+                            appliquer_malus(monstre, bonus_options[i])
+
+                        else:
+                            combat(1, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
                                 if monstre.pv <= 0 :
                                     monstre_mort = True
+                                    # envoie monstre mort
                                     data["monstre_mort"] = monstre_mort
                                     data["joueur_mort"] = joueur_mort
                                     socket.send(str.encode(str(data)))
+                                    
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
 
-                        if joueur_mort :
-                            mort()
-                            socket.close()
-                            pygame.quit()
-                            sys.exit()
-                        
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image) 
-                            else:
-                                en_combat = False  
+                            else :
+                                if joueurs_choix[compteur_lancers].pv <= 0:
+                                        joueur_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                                else :
+                                    attaque_magique(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+                                        data["monstre_mort"] = monstre_mort
+                                        data["joueur_mort"] = joueur_mort
+                                        socket.send(str.encode(str(data)))
+
+                            if joueur_mort :
+                                mort()
+                                return False
+                            
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image) 
+                                else:
+                                    en_combat = False  
+                                    for i, joueur in enumerate(joueurs_choix):
+                                        joueur.attaque = valeur_avant_combat[i][0]
+                                        joueur.magie = valeur_avant_combat[i][1]
+                                        joueur.vitesse = valeur_avant_combat[i][2]
+                                return True
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
@@ -915,15 +1235,16 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
                         en_combat = False
                         
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    data = {}
-                    data["pv"] = joueurs_choix[compteur_lancers].pv
-                    data["potion"] = joueurs_choix[compteur_lancers].potion
-                    data["monstre_mort"] = monstre_mort
-                    data["joueur_mort"] = joueur_mort
-                    data["monstre_pv"] = monstre.pv
-                    compteur_lancers += 1
-                    data["compteur_lancers"] = compteur_lancers
-                    socket.send(str.encode(str(data)))
+                    if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)) or bouton_attaque_puissante.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585)).collidepoint((mx, my)) or bouton_attaque_magique.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785)).collidepoint((mx, my)) and joueurs_choix[compteur_lancers].nom != 'Healer':
+                        data = {}
+                        data["pv"] = joueurs_choix[compteur_lancers].pv
+                        data["potion"] = joueurs_choix[compteur_lancers].potion
+                        data["monstre_mort"] = monstre_mort
+                        data["joueur_mort"] = joueur_mort
+                        data["monstre_pv"] = monstre.pv
+                        compteur_lancers += 1
+                        data["compteur_lancers"] = compteur_lancers
+                        socket.send(str.encode(str(data)))
 
             pygame.display.update()
             clock.tick(FPS)
@@ -964,18 +1285,42 @@ def combatMonstreReseau(numero, socket, joueurs_choix, monstre, compteur_lancers
                     monstre_mort = data['monstre_mort']
                     joueur_mort = data['joueur_mort']
                     
+                if len(data) == 4 :
+                    data['competeur_lancers'] = int(data['compteur_lancers'])
+                    data['choix'] = str(data['choix'])
+                    
+                    compteur_lancers = data['compteur_lancers']
+                    
+                    if data['choix'] == "soin" :
+                        data['joueur_choisi'] = int(data['joueur_choisi'])
+                        soin(joueurs_choix[data['joueur_choisi']])
+                        
+                    if data['choix'] == "boost" :
+                        data['bonus'] = str(data['bonus'])
+                        data['joueur_choisi'] = int(data['joueur_choisi'])
+                        appliquer_bonus(joueurs_choix[data['joueur_choisi']], data['bonus'])
+                        
+                    if data['choix'] == "malus" :
+                        data['malus'] = str(data['malus'])
+                        appliquer_malus(monstre, data['malus'])              
+                    
                 
                 if joueur_mort :
                     mort()
-                    socket.close()
-                    pygame.quit()
-                    sys.exit()
+                    return False
+                    
                 
                 elif monstre_mort :
                     if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
                         gagne(fond_image)
                     else:
                         en_combat = False
+                        # remettre les valeurs par défaut (attaques, magie, vitesse)
+                        for i, joueur in enumerate(joueurs_choix):
+                            joueur.attaque = valeur_avant_combat[i][0]
+                            joueur.magie = valeur_avant_combat[i][1]
+                            joueur.vitesse = valeur_avant_combat[i][2]
+                    return True
         
 def mort():
     menu_mort = True
@@ -1050,27 +1395,27 @@ def gagne(fond_image):
         
 def compteur(image, fond_image):
     compteur = 5
-    # while compteur >= 1 :
+    while compteur >= 1 :
         
-    #     fond_image2 = pygame.image.load(image).convert()
-    #     fond_image2 = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    #     screen.blit(fond_image2, (0, 0))
-    #     fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-    #     fond_chargement.fill(WHITE_TR)
-    #     screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-    #     draw_text(f"Un joueur est tombé sur un piège !", SCREEN_WIDTH//16, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
-    #     draw_text(f"Rassemblez vous et préparez vous au combat !", SCREEN_WIDTH//22, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.45, BLACK)
-    #     draw_text(f"{compteur}", SCREEN_WIDTH//13, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BLACK)
+        fond_image2 = pygame.image.load(image).convert()
+        fond_image2 = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        screen.blit(fond_image2, (0, 0))
+        fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+        fond_chargement.fill(WHITE_TR)
+        screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+        draw_text(f"Un joueur est tombé sur un piège !", SCREEN_WIDTH//16, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.2, BLACK)
+        draw_text(f"Rassemblez vous et préparez vous au combat !", SCREEN_WIDTH//22, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.45, BLACK)
+        draw_text(f"{compteur}", SCREEN_WIDTH//13, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BLACK)
 
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT:
-    #             pygame.quit()
-    #             sys.exit()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-    #     pygame.display.update()
-    #     clock.tick(FPS)
-    #     pygame.time.delay(1000)
-    #     compteur -= 1
+        pygame.display.update()
+        clock.tick(FPS)
+        pygame.time.delay(1000)
+        compteur -= 1
     
     
         

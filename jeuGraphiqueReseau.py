@@ -7,7 +7,7 @@ from labyrinthe import *
 from entite import *
 import time
 from bouton import *
-# from statistique import *
+from statistique import *
 from combatMonstre import *
 
 pygame.init()
@@ -23,6 +23,8 @@ FPS = 60
  
 
 def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
+    #temps de jeu
+    start_time = time.time()
     monstre = []
     boss = []
     monstre_choisi = None
@@ -263,6 +265,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                             if compteur_lancers >= len(joueurs_choix):
                                 compteur_lancers = 0
                                 nb_tour += 1
+                                print("nb_tour", nb_tour)
                                 for joueur in joueurs_choix:
                                     liste_postion_joueur.append(joueur.position)
                                 liste_position_potion.append(potion_positions)
@@ -330,17 +333,43 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
             
         # Combat final        
         if ouvrir_piege_doree:
-            combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix)  
-            ouvrir_piege_doree = False
-            running = False        
+            if combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
+                ouvrir_piege_doree = False
+                running = False   
+                # calcul du temps de jeu
+                duree = time.time() - start_time
+                partie_finie = True
+                monstre_battu = 6
+            else:
+                partie_finie = False
+                duree = time.time() - start_time
+                running = False
+                
+            if numero == "1" : 
+                mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nb_tour, choix, int(duree), nb_potion, nb_argent)  
+            
+            socket.close()
+            pygame.quit()
+            sys.exit()
      
         if joueurs_piegee:
-            combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix)
+            if not combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
+                joueurs_piegee = False
+                partie_finie = False
+                duree = time.time() - start_time
+                running = False
+                if numero == "1" :
+                    mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nb_tour, choix, int(duree), nb_potion, nb_argent)
+                socket.close()
+                pygame.quit()
+                sys.exit()
             joueurs_piegee = False
             monstre_battu += 1
 
         rectangles = []
         if compteur_lancers >= len(joueurs_choix):
+            nb_tour += 1
+            print("nb_tour", nb_tour)
             compteur_lancers = 0
 
         screen.blit(fond_image, (0, 0))
@@ -538,7 +567,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                             if int(numero) - 1 == joueurs_choix.index(joueurs_choix[compteur_lancers]) :
                                 liste_a_envoyer = []
                                                                 
-                                nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                                nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
                                 
                                 joueurs_choix[compteur_lancers].position = case
 
@@ -546,6 +575,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                                 compteur_lancers += 1
                                 if compteur_lancers >= len(joueurs_choix):
                                     nb_tour += 1
+                                    print("nb_tour", nb_tour)
                                     for joueur in joueurs_choix:
                                         liste_postion_joueur.append(joueur.position)
                                     liste_position_potion.append(potion_positions)
@@ -599,7 +629,8 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                                 
                                                                                                            
                     if compteur_lancers >= len(joueurs_choix):
-                        compteur_lancers = 0   
+                        compteur_lancers = 0  
+                        nb_tour += 1 
                             
                         
         else:
@@ -621,7 +652,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                     
                     compteur_lancers = liste_recu[1]
                     joueurs_choix[compteur_lancers - 1].position = cases
-                    nb_argent, nb_potion, argent_positions, potion_positions = verifier_objet_stat(cases, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers - 1], nb_argent, nb_potion)
+                    nb_argent, nb_potion = verifier_objet_stat(cases, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers - 1], nb_argent, nb_potion)
                     joueurs_choix[compteur_lancers - 1].pv = liste_recu[3]
                     joueurs_choix[compteur_lancers - 1].potion = liste_recu[4]
                     joueurs_choix[compteur_lancers - 1].argent = liste_recu[5]

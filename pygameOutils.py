@@ -313,7 +313,7 @@ def verifier_objet_stat(joueur_position, potion_positions, potion_images, argent
         joueur.ajouter_argent(100)
         nb_argent += 100
     
-    return nb_argent, nb_potion, argent_positions, potion_positions
+    return nb_argent, nb_potion
 
 def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
     if joueur_position in potion_positions:
@@ -377,8 +377,6 @@ def soin(joueur):
 def appliquer_bonus(joueur, bonus) :
     if bonus == "Attaque" :
         joueur.attaque = joueur.attaque + 10
-    elif bonus == "Défense":
-        joueur.defense = joueur.defense + 10
     elif bonus == "Magie":
         joueur.magie = joueur.magie + 10
     elif bonus == "Vitesse":
@@ -387,8 +385,6 @@ def appliquer_bonus(joueur, bonus) :
 def appliquer_malus(monstre, malus) :
     if malus == "Attaque" :
         monstre.attaque = monstre.attaque - 10
-    elif malus == "Défense":
-        monstre.defense = monstre.defense - 10
     elif malus == "Magie":
         monstre.magie = monstre.magie - 10
     elif malus == "Vitesse":
