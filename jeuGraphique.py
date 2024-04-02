@@ -1,11 +1,14 @@
 import pygame
 import sys
+import random
 from plateau import *
 from pygameOutils import *
 from labyrinthe import *
 from entite import *
 from bouton import *
 import combatMonstre
+import time
+import statistique
 
 pygame.init()
 
@@ -20,6 +23,13 @@ FPS = 60
  
 
 def affichageGraphique(choix, graphe, joueurs_choix) :
+    duree = 0
+    monstre_tue = 0
+    nombre_tour = 0
+    # Calcul de la durée de la partie
+    time_start = time.time()
+    nb_argent = 0
+    nb_potion = 0
     argent_positions = []
     potion_positions = []
 
@@ -30,14 +40,25 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     'img/map/donjon.png'
     ]
 
-    liste_loup = []
+    monstre = []
+    boss = []
     
-    i = 0
-    while i < 5 :
-        liste_loup.append(Monstre("Loup", 50, 50, 10, 5, 15, "img/ennemi/loup.png"))
-        i += 1
-
-    dragon = Monstre("Dragon", 100, 100, 20, 10, 12, "img/ennemi/dragon.png")
+    monstre.append(Monstre("Loup", 50, 50, 10, 5, 15, "img/ennemi/loup.png"))
+    monstre.append(Monstre("Gobelin", 60, 60, 15, 8, 10, "img/ennemi/gobelin.png"))
+    monstre.append(Monstre("Orc", 70, 70, 20, 10, 12, "img/ennemi/orc.png"))
+    monstre.append(Monstre("Troll", 80, 80, 25, 12, 14, "img/ennemi/troll.png"))
+    monstre.append(Monstre("Slime", 40, 40, 5, 3, 20, "img/ennemi/slime.png"))
+    monstre.append(Monstre("Squelette", 50, 50, 10, 5, 15, "img/ennemi/squelette.png"))
+    monstre.append(Monstre("Zombie", 60, 60, 15, 8, 10, "img/ennemi/zombie.png"))
+    monstre.append(Monstre("Fantome", 70, 70, 20, 10, 12, "img/ennemi/fantome.png"))
+    monstre.append(Monstre("Momie", 80, 80, 25, 12, 14, "img/ennemi/momie.png"))
+    
+    boss.append(Monstre("Dragon", 100, 100, 20, 10, 12, "img/ennemi/dragon.png"))
+    boss.append(Monstre("Mort", 100, 100, 20, 10, 12, "img/ennemi/mort.png"))
+    boss.append(Monstre("Aguni", 100, 100, 20, 10, 12, "img/ennemi/aguni.png"))
+    boss.append(Monstre("Gergoth", 100, 100, 20, 10, 12, "img/ennemi/gergoth.png"))
+    boss.append(Monstre("Ange Déchu", 100, 100, 20, 10, 12, "img/ennemi/angeDechu.png"))
+    
     
     fond_image = pygame.image.load(fond[choix]).convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -54,8 +75,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
     monstre_battu = 0
     compteur_lancers = 0
-    compteur_loup = 0
-
+    
     laby = Grille(largeur, hauteur)
     laby.construireBordure()
     graphe = labyrinthe(largeur, hauteur)
@@ -239,10 +259,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     point_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 9.2)
 
 
-                    if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):
-
-                        verifier_objet(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers])
-                            
+                    if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):                           
+                        nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
                         joueurs_choix[compteur_lancers].position = case
 
                         if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
@@ -253,6 +271,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         compteur_lancers += 1
                         if compteur_lancers >= len(joueurs_choix):
                             compteur_lancers = 0
+                            nombre_tour += 1
                         lancer_fait = False
                         break
 
@@ -270,10 +289,11 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             if joueurs_piegee == True :
                 for joueur in joueurs_choix:
                     joueur.position = case
-                combatMonstre.combatMonstre(joueurs_choix, liste_loup[compteur_loup], 0, monstre_battu, choix)
+                choix_monstre = random.choice(monstre)
+                monstre.remove(choix_monstre)
+                combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix)
                 joueurs_piegee = False
                 compteur_lancers = 0
-                compteur_loup += 1
                 monstre_battu += 1
             
             # Dans le shop        
@@ -404,14 +424,30 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
                 compteur_lancers += 1
                 if compteur_lancers >= len(joueurs_choix):
-                            compteur_lancers = 0
-
+                    compteur_lancers = 0
+                    nombre_tour += 1
+                            
                 lancer_fait = False
                 ouvrir_shop = False
                 
             # Combat final        
             if ouvrir_piege_doree :
-                combatMonstre.combatMonstre(joueurs_choix, dragon, 0, monstre_battu, choix)
+                choix_boss = random.choice(boss)
+                if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix):
+                    # calcul de la durée total de la partie
+                    time_end = time.time()
+                    duree = time_end - time_start
+                    running = False
+                    partie_finie = True
+                    monstre_battu = 6
+                else:
+                    time_end = time.time()
+                    duree = time_end - time_start
+                    running = False   
+                    partie_finie = False
+                    
+                    
+                statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
                 sys.exit()
 
         bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale

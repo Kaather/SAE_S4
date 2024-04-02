@@ -329,7 +329,7 @@ def verifier_objet_stat(joueur_position, potion_positions, potion_images, argent
         joueur.ajouter_argent(100)
         nb_argent += 100
     
-    return nb_argent, nb_potion, argent_positions, potion_positions
+    return nb_argent, nb_potion
 
 def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
     if joueur_position in potion_positions:
@@ -385,18 +385,26 @@ def combat(attaque_choisi, joueur, monstre) :
     else :
         monstre_attaque(joueur, monstre)
         
-def soin(joueur, joueur_choix):
-    liste_joueur_manque_vie = []
-    for joueurs in joueur_choix:
-        if joueurs.pv < joueurs.pv_max:
-            liste_joueur_manque_vie.append(joueurs)
-    if liste_joueur_manque_vie != []:
-        num = random.randint(0, len(liste_joueur_manque_vie) - 1)            
-        liste_joueur_manque_vie[num].pv += joueur.magie//3
-        if liste_joueur_manque_vie[num].pv > liste_joueur_manque_vie[num].pv_max:
-            liste_joueur_manque_vie[num].pv = liste_joueur_manque_vie[num].pv_max
-    else:
-        pass
+def soin(joueur):
+    joueur.pv = joueur.pv + 10
+    if joueur.pv > joueur.pv_max :
+        joueur.pv = joueur.pv_max
+        
+def appliquer_bonus(joueur, bonus) :
+    if bonus == "Attaque" :
+        joueur.attaque = joueur.attaque + 10
+    elif bonus == "Magie":
+        joueur.magie = joueur.magie + 10
+    elif bonus == "Vitesse":
+        joueur.vitesse = joueur.vitesse + 10
+        
+def appliquer_malus(monstre, malus) :
+    if malus == "Attaque" :
+        monstre.attaque = monstre.attaque - 10
+    elif malus == "Magie":
+        monstre.magie = monstre.magie - 10
+    elif malus == "Vitesse":
+        monstre.vitesse = monstre.vitesse - 10
 
 if __name__ == '__main__':
 
