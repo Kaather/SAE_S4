@@ -1,0 +1,31 @@
+Regles du jeu : 
+
+Bien sûr, voici la suite des règles de votre jeu :
+
+1. **Les Monstres :**
+   - Chaque joueur commence avec un niveau de santé et une force déterminés aléatoirement. 
+   - Lorsqu'un joueur rencontre un monstre, un combat est déclenché.
+   - Pour combattre un monstre, le joueur lance un dé pour déterminer l'issue du combat. La force du joueur et celle du monstre seront prises en compte pour déterminer le résultat.
+   - Si le joueur gagne, il récupère une récompense, telle que de l'argent ou des points de vie supplémentaires.
+   - Si le joueur perd, il subit des dégâts en fonction de la force du monstre et peut être contraint de reculer sur le plateau.
+
+2. **Les Trappes :**
+   - Le plateau est parsemé de trappes. Lorsqu'un joueur tombe sur une trappe, il subit un effet aléatoire, pouvant être bénéfique ou néfaste.
+   - Les effets peuvent inclure la perte d'argent, la perte de points de vie, des déplacements aléatoires sur le plateau, ou même des rencontres avec des monstres supplémentaires.
+
+3. **Le Shop :**
+   - Le Shop est un endroit où les joueurs peuvent dépenser leur argent durement gagné.
+   - Les items disponibles à l'achat peuvent inclure des potions de soin, des armes améliorées, des armures renforcées, ou des objets spéciaux offrant des avantages temporaires.
+   - Les prix des articles varient en fonction de leur utilité et de leur rareté.
+
+4. **Le Boss Final :**
+   - Une fois que les joueurs ont traversé le labyrinthe, combattu divers monstres et rassemblé des ressources, ils atteignent enfin le Boss Final.
+   - Le Boss Final est un ennemi redoutable avec une santé et une force considérablement supérieures à celles des autres monstres.
+   - Pour vaincre le Boss Final, les joueurs doivent unir leurs forces et utiliser leurs compétences et leurs ressources au maximum.
+   - Le combat contre le Boss Final est une bataille épique, et la victoire apporte la gloire et la reconnaissance éternelle aux joueurs.
+
+5. **Gagner le Jeu :**
+   - Le jeu se termine lorsque le Boss Final est vaincu.
+   - Le joueur ou l'équipe de joueurs ayant vaincu le Boss Final est déclaré vainqueur du jeu.
+
+Ces règles devraient fournir un cadre solide pour votre jeu de plateau. N'hésitez pas à les adapter ou à les modifier selon vos préférences ou les besoins spécifiques de votre jeu.

@@ -4,6 +4,7 @@ import random
 from entite import *
 from plateau import *
 from labyrinthe import *
+from bouton import *
 
 
 # Initialisation de Pygame
@@ -16,19 +17,6 @@ SCREEN_WIDTH, SCREEN_HEIGHT = info.current_w, info.current_h
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("Exemple de rectangles")
 
-# Couleurs
-TRANSPARENT = (255, 255, 255, 0)
-WHITE = (255, 255, 255)
-WHITE_TR = (255, 255, 255, 100)
-BROWN_TR = (130, 60, 20, 100)
-BROWN = (130, 60, 20, 200)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-BLACK_TR = (0, 0, 0, 100)
-RED = (255, 0, 0)
-RED_MENU = (255, 0, 0, 128)
-GREY = (128, 128, 128)
-GREY_TR = (128, 128, 128, 100)
 
 screen.fill(WHITE)
 
@@ -37,7 +25,7 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("Monster Slayer")
 
 # Charger la police
-font_path = "font/MedievalSharp-Bold.ttf"  # Assurez-vous de spécifier le bon chemin
+font_path = "font/MedievalSharp-Bold.ttf"
 font = pygame.font.Font(font_path, 30)
 
 # Utiliser la police pour afficher du texte
@@ -121,18 +109,16 @@ def afficherJoueurLaby(joueur):
     
     joueur_image = pygame.image.load(joueur.image).convert()
     joueur_image.set_colorkey(BLACK)
-    joueur_image = pygame.transform.scale(joueur_image, (45, 45))  
-    screen.blit(joueur_image, (joueur.position[0] * 52 + 361, joueur.position[1] * 52 + 58))
+    joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//28, SCREEN_WIDTH//28))  
+    screen.blit(joueur_image, (joueur.position[0] * (SCREEN_WIDTH//24.5) + SCREEN_WIDTH//3.55, joueur.position[1] * (SCREEN_WIDTH//24.5) + SCREEN_WIDTH//22))
 
 def afficherJoueursLaby(joueurs):
     positions = {}  # Dictionnaire pour stocker les positions des joueurs
 
     # Parcours des joueurs et ajout de leurs positions au dictionnaire
     for joueur in joueurs:
-        joueur_image = pygame.image.load(joueur.image).convert()
-        joueur_image.set_colorkey(BLACK)
-        joueur_image = pygame.transform.scale(joueur_image, (45, 45))  
-        screen.blit(joueur_image, (joueur.position[0] * 52 + 361, joueur.position[1] * 52 + 58))
+        afficherJoueurLaby(joueur)
+        afficherJoueurLaby(joueur)
         position = joueur.position
         if position not in positions:
             positions[position] = []
@@ -156,20 +142,22 @@ def afficherJoueursLaby(joueurs):
         else:
             afficherJoueurLaby(joueurs_sur_case[0])
 
-def piege(graphe):
+def evenement(graphe):
     pieges_normaux = []  # Liste pour stocker les informations sur les pièges normaux
-    pieges_dores = []  # Liste pour stocker les informations sur les pièges dorés
+    piege_dore = []  # Liste pour stocker les informations sur le piège doré
+    shop = []  # Liste pour stocker les informations sur le shop
     piege_images = []  # Liste pour stocker les images des pièges
-    piege_doree_image = pygame.image.load('img/element/piegeDoree.png').convert()
+    piege_dore_image = pygame.image.load('img/element/piegeDoree.png').convert()
+    shop_image = pygame.image.load('img/element/shop.png').convert()
 
-    # Positions exclues pour les pièges
+    # Positions exclues pour les pièges et le shop
     exclusions = [(5, 10), (4, 10), (6, 10), (5, 9)]
 
     # Générer une liste de toutes les cases valides du graphe
     cases_valides = list(graphe.keys())
 
     # Ajouter des pièges normaux jusqu'à ce que la liste atteigne 4 éléments
-    while len(pieges_normaux) < 5 :
+    while len(pieges_normaux) < 5:
         position = random.choice(cases_valides)
 
         # Vérifier si la position est valide et ne se trouve pas dans les exclusions
@@ -177,20 +165,34 @@ def piege(graphe):
             pieges_normaux.append(position)  # Ajouter la position du piège normal
             piege_images.append(pygame.image.load('img/element/piege.png').convert())
             piege_images[-1].set_colorkey(BLACK)
-            piege_images[-1] = pygame.transform.scale(piege_images[-1], (42, 42))
+            piege_images[-1] = pygame.transform.scale(piege_images[-1], (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
+            exclusions.append(position)
+            piege_images[-1] = pygame.transform.scale(piege_images[-1], (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
+            exclusions.append(position)
 
     # Ajouter un piège en or
-    doree_piege_position = random.choice(cases_valides)
+    dore_piege_position = random.choice(cases_valides)
 
     # S'assurer que la position du piège en or n'entre pas en conflit avec les autres pièges
-    while doree_piege_position in pieges_normaux or doree_piege_position in exclusions:
-        doree_piege_position = random.choice(cases_valides)
+    while dore_piege_position in pieges_normaux or dore_piege_position in exclusions:
+        dore_piege_position = random.choice(cases_valides)
 
-    pieges_dores.append(doree_piege_position)  # Ajouter la position du piège en or
-    piege_doree_image.set_colorkey(BLACK)
-    piege_doree_image = pygame.transform.scale(piege_doree_image, (42, 42))
+    piege_dore.append(dore_piege_position) 
+    piege_dore_image.set_colorkey(BLACK)
+    piege_dore_image = pygame.transform.scale(piege_dore_image, (SCREEN_WIDTH//30, SCREEN_WIDTH//30))
 
-    return pieges_normaux, pieges_dores, piege_images, piege_doree_image
+    # Ajouter le shop
+    shop_position = random.choice(cases_valides)
+
+    # S'assurer que la position du shop n'entre pas en conflit avec les autres pièges ou le shop
+    while shop_position in pieges_normaux or shop_position in dore_piege_position or shop_position in exclusions:
+        shop_position = random.choice(cases_valides)
+
+    shop.append(shop_position) 
+    shop_image.set_colorkey(BLACK)
+    shop_image = pygame.transform.scale(shop_image, (SCREEN_WIDTH//17, SCREEN_WIDTH//17))
+
+    return pieges_normaux, piege_dore, piege_images, piege_dore_image, shop, shop_image
 
 def joueur_sur_piege(joueur, pieges):
     return joueur.position in pieges
@@ -198,8 +200,11 @@ def joueur_sur_piege(joueur, pieges):
 def joueur_sur_piege_doree(joueur, piege_doree):
     return joueur.position in piege_doree
 
+def joueur_sur_shop(joueur, shop) :
+    return joueur.position in shop
 
-def ajouter_objet(graphe, piege_positions, piege_doree_positions):
+
+def ajouter_objet(graphe, piege_positions, piege_doree_position, shop_position):
     potion_positions = []  # Liste pour stocker les positions des potions
     potion_images = []  # Liste pour stocker les images des potions
     argent_positions = []  # Liste pour stocker les positions de l'argent
@@ -212,9 +217,9 @@ def ajouter_objet(graphe, piege_positions, piege_doree_positions):
     cases_valides = list(graphe.keys())
 
     # Exclure les positions des pièges et pièges dorés de la liste des cases valides
-    cases_valides = [case for case in cases_valides if case not in piege_positions and case not in piege_doree_positions]
+    cases_valides = [case for case in cases_valides if case not in piege_positions and case not in piege_doree_position and case not in shop_position]
 
-    while len(potion_positions) < 10:
+    while len(potion_positions) < 6:
         position = random.choice(cases_valides)
 
         # Vérifier si la position est valide et ne se trouve pas dans les exclusions
@@ -226,26 +231,46 @@ def ajouter_objet(graphe, piege_positions, piege_doree_positions):
             potion_images.append(pygame.image.load('img/element/Potion.png').convert())
 
             potion_images[-1].set_colorkey(BLACK)
-            potion_images[-1] = pygame.transform.scale(potion_images[-1], (30, 30))
+            potion_images[-1] = pygame.transform.scale(potion_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
+            potion_images[-1] = pygame.transform.scale(potion_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
-    while len(argent_positions) < 10:
+    while len(argent_positions) < 17:
         position = random.choice(cases_valides)
 
         # Vérifier si la position est valide et ne se trouve pas dans les exclusions
         if (
             position not in argent_positions and
-            position not in exclusions
+            position not in exclusions and
+            position not in potion_positions
         ):
             argent_positions.append(position)
             argent_images.append(pygame.image.load('img/element/argent.png').convert())
 
             argent_images[-1].set_colorkey(BLACK)
-            argent_images[-1] = pygame.transform.scale(argent_images[-1], (30, 30))
+            argent_images[-1] = pygame.transform.scale(argent_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
+            argent_images[-1] = pygame.transform.scale(argent_images[-1], (SCREEN_WIDTH//38, SCREEN_WIDTH//38))
 
     return potion_positions, potion_images, argent_positions, argent_images
 
 
 
+
+def verifier_objet_stat(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur, nb_argent, nb_potion):
+    if joueur_position in potion_positions:
+        index = potion_positions.index(joueur_position)
+        potion_positions.pop(index)
+        del potion_images[index]
+        joueur.ajouter_potion(1)
+        nb_potion += 1
+
+    if joueur_position in argent_positions:
+        index = argent_positions.index(joueur_position)
+        argent_positions.pop(index)
+        del argent_images[index]
+        joueur.ajouter_argent(100)
+        nb_argent += 100
+    
+    return nb_argent, nb_potion, argent_positions, potion_positions
 
 def verifier_objet(joueur_position, potion_positions, potion_images, argent_positions, argent_images, joueur):
     if joueur_position in potion_positions:

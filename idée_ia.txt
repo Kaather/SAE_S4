@@ -1,0 +1,28 @@
+Pour les niveaux de diffcicultés (deplacements): case accessible / code jeuGraphique L229
+
+- facile : aléatoire parmis la liste des deplacements possible ( entre 1 et 6)
+
+- intermediaire : main droite , parcours tout le labyrinthe
+
+- difficile : si un piege est visible va se dirige vers le piege et les zones d'ombres.
+Agit en fonction des autres joueurs 
+Mettre des objectifs piece / trappes
+A faire avec a*
+
+
+COMBAT : code jeuGraphique / L268
+
+- facile : aleatoire comme niveau facile pour les deplacements.
+
+- intermediaire : Prioser les attaques en fonction des personnages ( liste de 1 à 6 ), ce qui serait le plus efficace.
+
+- difficile : minmax (avec renforcement) 
+
+
+A rajouter pouvoir choisir le niveau de chaque ia dans le jeu
++ rajouter indication quand tour du joueur.
+
+
+
+
+Fonctionnalité ou le labyrinthe est dans le noir 
