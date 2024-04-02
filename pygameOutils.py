@@ -48,6 +48,22 @@ class Rectangle:
     def draw(self):
         pygame.draw.rect(screen, self.color, self.rect)
 
+class RectangleOmbre(Rectangle):
+    """Classe qui va permettre de créer des carrés d'ombre avec un état de visibilité"""
+
+    def __init__(self, color, x, y, width, height):
+        super().__init__(color, x, y, width, height)
+        self.visible = True
+
+    def set_explored(self):
+        """Définir l'état de la case comme explorée"""
+        self.visible = False
+
+    def draw(self):
+        """Redéfinition de la méthode draw pour prendre en compte l'état de visibilité"""
+        if self.visible:
+            pygame.draw.rect(screen, self.color, self.rect)
+
 class Point:
     """Classe qui représente un point"""
 
@@ -382,11 +398,13 @@ def soin(joueur, joueur_choix):
     else:
         pass
 
-if __name__ == '__main__' :
+if __name__ == '__main__':
 
-    rectangle1 = Rectangle((BLACK), 50, 50, 20, 5)
-    rectangle2 = Rectangle((BLACK), 200, 200, 5, 20)
-    pointRouge = Point(100,200)
+    rectangle1 = Rectangle(BLACK, 50, 50, 20, 5)
+    rectangle2 = Rectangle(BLACK, 200, 200, 5, 20)
+    pointRouge = Point(100, 200)
+
+    carreOmbre1 = RectangleOmbre(BLACK, 300, 200, 50, 50)
 
     barre_joueur = BarreVie(350, 50, 100, 100)
     barre_monstre = BarreVie(550, 450, 150, 150, True)
@@ -399,12 +417,16 @@ if __name__ == '__main__' :
 
         background_image = pygame.image.load('img/map/foret.png').convert()
         background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        screen.blit(background_image, (0, 0))
 
         barre_joueur.afficher_barre_vie(screen)
         barre_monstre.afficher_barre_vie(screen, 2)
-        
+
         rectangle1.draw()
         rectangle2.draw()
-        pointRouge.draw((RED), 5)
+        pointRouge.draw(RED, 5)
+        carreOmbre1.draw()
+
+        carreOmbre1.set_explored()
 
         pygame.display.flip()

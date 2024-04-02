@@ -14,7 +14,7 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, monstre_battu, choix
         'img/map/desert.png',  
         'img/map/neige.png',
         'img/map/foret.png',
-        'img/map/dongeon.png'
+        'img/map/donjon.png'
     ]
     fond_image = pygame.image.load(fond[choix]).convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))

@@ -40,11 +40,17 @@ class Bouton:
         surface.blit(self.bouton_actuelle, (self.pos_x, self.pos_y))
 
         # Rendre le texte
-        texte_surface = self.police.render(self.texte, True, self.couleur_texte)
-        texte_rect = texte_surface.get_rect(center=(self.pos_x + self.largeur // 2, self.pos_y + self.hauteur // 2))
+        lignes_texte = self.texte.split("\n")
+        total_text_height = len(lignes_texte) * self.taille_texte
+        y_offset = (self.hauteur - total_text_height) // 2  # Offset pour centrer le texte verticalement
 
-        # Dessiner le texte sur le bouton
-        surface.blit(texte_surface, texte_rect)
+        for i, ligne in enumerate(lignes_texte):
+            texte_surface = self.police.render(ligne, True, self.couleur_texte)
+            texte_rect = texte_surface.get_rect(center=(self.pos_x + self.largeur // 2, 
+                                                       self.pos_y + y_offset + (i + 0.5) * self.taille_texte))
+
+            # Dessiner le texte sur le bouton
+            surface.blit(texte_surface, texte_rect)
 
     def est_survol(self, mouse_x, mouse_y):
         # Vérifier si la souris est positionnée sur le bouton
@@ -54,6 +60,8 @@ class Bouton:
     def set_couleur(self, couleur, survol):
         self.bouton_normale.fill(couleur)
         self.bouton_survol.fill(survol)
+
+
 
 if __name__ == "__main__" :
 

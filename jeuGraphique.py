@@ -27,7 +27,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     'img/map/desert.png',  
     'img/map/neige.png',
     'img/map/foret.png',
-    'img/map/dongeon.png'
+    'img/map/donjon.png'
     ]
 
     liste_loup = []
@@ -53,9 +53,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     shopping = False
 
     monstre_battu = 0
-
     compteur_lancers = 0
-
     compteur_loup = 0
 
     laby = Grille(largeur, hauteur)
@@ -68,8 +66,17 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
     potion_positions, potion_images, argent_positions, argent_images = ajouter_objet(graphe, piege_positions, piege_doree_positions, shop_positions)
 
     bouton_quitter = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Quitter", SCREEN_WIDTH//45)
+    bouton_sortir = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//16, TRANSPARENT, BROWN, "Sortir", SCREEN_WIDTH//45)
+    bouton_potion = Bouton(SCREEN_WIDTH*0.17, SCREEN_HEIGHT*0.07, SCREEN_WIDTH*0.85, SCREEN_HEIGHT*0.155, WHITE_TR, WHITE, "Boire potion", SCREEN_WIDTH//35)
+    bouton_shop = Bouton(SCREEN_WIDTH*0.215, SCREEN_HEIGHT*0.18, SCREEN_WIDTH*0.85, SCREEN_HEIGHT*0.78, WHITE_TR, WHITE, "Ouvrir le \nshop !", SCREEN_WIDTH//26)
+    bouton_piege_doree = Bouton(SCREEN_WIDTH*0.215, SCREEN_HEIGHT*0.18, SCREEN_WIDTH*0.85, SCREEN_HEIGHT*0.73, WHITE_TR, WHITE, "Ouvrir le \npiège doré !", SCREEN_WIDTH//28)
+    bouton_achat_attaque = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//2, SCREEN_WIDTH//6.75, SCREEN_HEIGHT//1.95, WHITE_TR, WHITE, "", SCREEN_WIDTH//100)
+    bouton_achat_magie = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//2, SCREEN_WIDTH//2.62, SCREEN_HEIGHT//1.95, WHITE_TR, WHITE, "", SCREEN_WIDTH//100)
+    bouton_achat_vitesse = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//2, SCREEN_WIDTH//1.605, SCREEN_HEIGHT//1.95, WHITE_TR, WHITE, "", SCREEN_WIDTH//100)
+    bouton_achat_potion = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//2, SCREEN_WIDTH//1.165, SCREEN_HEIGHT//1.95, WHITE_TR, WHITE, "", SCREEN_WIDTH//100)
 
     running = True
+    cases_explorees = [] 
     while running:
 
         rectangles = []
@@ -131,11 +138,12 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         screen.blit(fond_player, ((SCREEN_WIDTH*0.001), SCREEN_HEIGHT*(0.001)))
         draw_text(f"Joueur {compteur_lancers + 1} :", SCREEN_WIDTH//25, SCREEN_WIDTH*0.09, SCREEN_HEIGHT*0.01, BLACK)
 
-
         if not lancer_fait:  
             de, cases_accessibles = dice(graphe, joueurs_choix[compteur_lancers])   
             de_resultat = de
             lancer_fait = True
+            # Ajouter les cases accessibles à la liste des cases explorées
+            cases_explorees.extend(cases_accessibles)
 
         barre_joueur = BarreVie(SCREEN_WIDTH//9.5, SCREEN_HEIGHT//8, joueurs_choix[compteur_lancers].pv, joueurs_choix[compteur_lancers].pv_max)
 
@@ -150,21 +158,13 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
         # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
         if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
-            bouton_potion = pygame.Surface((SCREEN_WIDTH*0.17, SCREEN_HEIGHT*0.07), pygame.SRCALPHA)
-            bouton_potion.fill(WHITE_TR)
-            screen.blit(bouton_potion, ((SCREEN_WIDTH*0.78), SCREEN_HEIGHT*0.155))
-            draw_text("Boire potion", SCREEN_WIDTH//35, SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.155, BLACK)
             potion_possible = True
         
         if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
-            bouton_shop = pygame.Surface((SCREEN_WIDTH*0.215, SCREEN_HEIGHT*0.18), pygame.SRCALPHA)
-            bouton_shop.fill(WHITE_TR)
-            screen.blit(bouton_shop, ((SCREEN_WIDTH*0.755), SCREEN_HEIGHT*0.73))
-            draw_text("Ouvrir le", SCREEN_WIDTH//28, SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.725, BLACK)
-            draw_text("Shop !", SCREEN_WIDTH//28, SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.825, BLACK)
+            bouton_shop.hovered = bouton_shop.est_survol(mx, my)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_shop.get_rect(center=(SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.775)).collidepoint((mx, my)):
+                if bouton_shop.est_survol(mx, my):
                     ouvrir_shop = True
 
         # Affichage bouton ouvrir piège dorée (seulement si on a fait les 5 pièges et qu'on est sur la case du piège dorée)
@@ -172,15 +172,12 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             piege_doree_possible = True 
             draw_text("Vous pouvez aller", SCREEN_WIDTH//45, SCREEN_WIDTH*0.11, SCREEN_HEIGHT*0.83, BLACK)
             draw_text("ouvrir le piège dorée !", SCREEN_WIDTH//45, SCREEN_WIDTH*0.115, SCREEN_HEIGHT*0.88, BLACK)
+
         if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :
-            bouton_piege_doree = pygame.Surface((SCREEN_WIDTH*0.215, SCREEN_HEIGHT*0.18), pygame.SRCALPHA)
-            bouton_piege_doree.fill(WHITE_TR)
-            screen.blit(bouton_piege_doree, ((SCREEN_WIDTH*0.755), SCREEN_HEIGHT*0.73))
-            draw_text("Ouvrir le", SCREEN_WIDTH//28, SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.725, BLACK)
-            draw_text("piège dorée !", SCREEN_WIDTH//28, SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.825, BLACK)
+            bouton_piege_doree.hovered = bouton_piege_doree.est_survol(mx, my)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_piege_doree.get_rect(center=(SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.775)).collidepoint((mx, my)):
+                if bouton_piege_doree.est_survol(mx, my):
                     ouvrir_piege_doree = True
 
         for piege_position in piege_positions:
@@ -207,6 +204,16 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             x, y = case
             pointRouge = Point((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8))
             pointRouge.draw((RED), (SCREEN_HEIGHT//150))
+
+
+        for y in range(laby.getHauteur()):
+            for x in range(laby.getLargeur()):
+                base_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.63)
+                base_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 14)
+                # Vérifiez si la case a déjà été explorée avant de dessiner le rectangle d'ombre
+                if (x, y) not in cases_explorees: 
+                    carre_ombre = RectangleOmbre(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_HEIGHT//13.8)
+                    carre_ombre.draw()
 
 
         for event in pygame.event.get():
@@ -250,12 +257,13 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         break
 
             if potion_possible == True :
+
                 if event.type == pygame.MOUSEMOTION: 
                     mx, my = pygame.mouse.get_pos()
-                    potion_possible = bouton_potion.get_rect(center=(SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.19)).collidepoint((mx, my))
+                    bouton_potion.hovered = bouton_potion.est_survol(mx, my)
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bouton_potion.get_rect(center=(SCREEN_WIDTH*0.864, SCREEN_HEIGHT*0.19)).collidepoint((mx, my)): 
+                    if bouton_potion.est_survol(mx, my):
                         joueurs_choix[compteur_lancers].utiliser_potion()
                         potion_possible = False
                     
@@ -268,12 +276,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                 compteur_loup += 1
                 monstre_battu += 1
             
-            # Dans le shop
-            bouton_sortir_shop_survole = False
-            bouton_achat_1_survole = False
-            bouton_achat_2_survole = False
-            bouton_achat_3_survole = False
-            bouton_achat_4_survole = False
+            # Dans le shop        
             if ouvrir_shop :
                 shopping = True
                 while shopping :
@@ -283,37 +286,30 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     shop_map_image = pygame.image.load('img/map/mapShop.png').convert()
                     shop_map_image = pygame.transform.scale(shop_map_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
                     screen.blit(shop_map_image, (0, 0))
-                    
-                    bouton_sortir_shop = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
-                    bouton_sortir_shop.fill(TRANSPARENT if not bouton_sortir_shop_survole else BROWN)
-                    screen.blit(bouton_sortir_shop, ((SCREEN_WIDTH*0.92, SCREEN_HEIGHT//22)))
-                    draw_text("Sortir", SCREEN_WIDTH//43, SCREEN_WIDTH*0.96, SCREEN_HEIGHT//22, BLACK)
 
                     joueur_image = pygame.image.load(joueurs_choix[compteur_lancers].image).convert_alpha()
                     joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//8, SCREEN_WIDTH//8))
                     screen.blit(joueur_image, (SCREEN_WIDTH*0.325, SCREEN_HEIGHT*0.65))
 
-                    bouton_achat_1 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//2), pygame.SRCALPHA)
-                    bouton_achat_1.fill(WHITE_TR if not bouton_achat_1_survole else WHITE)
-                    screen.blit(bouton_achat_1, ((SCREEN_WIDTH//21, SCREEN_HEIGHT//4)))
+                    bouton_achat_attaque.bouton_actuelle = bouton_achat_attaque.bouton_survol if bouton_achat_attaque.hovered else bouton_achat_attaque.bouton_normale
+                    bouton_achat_magie.bouton_actuelle = bouton_achat_magie.bouton_survol if bouton_achat_magie.hovered else bouton_achat_magie.bouton_normale
+                    bouton_achat_vitesse.bouton_actuelle = bouton_achat_vitesse.bouton_survol if bouton_achat_vitesse.hovered else bouton_achat_vitesse.bouton_normale
+                    bouton_achat_potion.bouton_actuelle = bouton_achat_potion.bouton_survol if bouton_achat_potion.hovered else bouton_achat_potion.bouton_normale
+
+                    bouton_achat_attaque.dessiner(screen)
+                    bouton_achat_magie.dessiner(screen)
+                    bouton_achat_vitesse.dessiner(screen)
+                    bouton_achat_potion.dessiner(screen)
+
                     draw_text("+ 10 Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH//7, SCREEN_HEIGHT//1.55, BLACK)
                     draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//6.8, SCREEN_HEIGHT//1.43, BLACK)
 
-                    bouton_achat_2 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//2), pygame.SRCALPHA)
-                    bouton_achat_2.fill(WHITE_TR if not bouton_achat_2_survole else WHITE)
-                    screen.blit(bouton_achat_2, ((SCREEN_WIDTH//3.52, SCREEN_HEIGHT//4)))
                     draw_text("+ 10 Magie", SCREEN_WIDTH//35, SCREEN_WIDTH//2.65, SCREEN_HEIGHT//1.55, BLACK)
                     draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//2.6, SCREEN_HEIGHT//1.43, BLACK)
 
-                    bouton_achat_3 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//2), pygame.SRCALPHA)
-                    bouton_achat_3.fill(WHITE_TR if not bouton_achat_3_survole else WHITE)
-                    screen.blit(bouton_achat_3, ((SCREEN_WIDTH//1.92, SCREEN_HEIGHT//4)))
                     draw_text("+ 10 Vitesse", SCREEN_WIDTH//35, SCREEN_WIDTH//1.62, SCREEN_HEIGHT//1.55, BLACK)
-                    draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.61, SCREEN_HEIGHT//1.43, BLACK)
+                    draw_text("200$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.61, SCREEN_HEIGHT//1.43, BLACK)
 
-                    bouton_achat_4 = pygame.Surface((SCREEN_WIDTH//5, SCREEN_HEIGHT//2), pygame.SRCALPHA)
-                    bouton_achat_4.fill(WHITE_TR if not bouton_achat_4_survole else WHITE)
-                    screen.blit(bouton_achat_4, ((SCREEN_WIDTH//1.32, SCREEN_HEIGHT//4)))
                     draw_text("+ 1 Potion", SCREEN_WIDTH//35, SCREEN_WIDTH//1.175, SCREEN_HEIGHT//1.55, BLACK)
                     draw_text("100$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.17, SCREEN_HEIGHT//1.43, BLACK)
 
@@ -347,67 +343,61 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                         if event.type == pygame.MOUSEMOTION: 
                             mx, my = pygame.mouse.get_pos()
                             bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
+                            bouton_sortir.hovered = bouton_sortir.est_survol(mx, my)
+
+                            if joueurs_choix[compteur_lancers].argent >= 300 :
+
+                                bouton_achat_attaque.hovered = bouton_achat_attaque.est_survol(mx, my)
+                                bouton_achat_magie.hovered = bouton_achat_magie.est_survol(mx, my)
+
+                            if joueurs_choix[compteur_lancers].argent >= 200 :
+
+                                bouton_achat_vitesse.hovered = bouton_achat_vitesse.est_survol(mx, my)
+
+                            if joueurs_choix[compteur_lancers].argent >= 100 :
+                                
+                                bouton_achat_potion.hovered = bouton_achat_potion.est_survol(mx, my)
 
                         if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_quitter.est_survol(mx, my):
+                            if bouton_quitter.est_survol(mx, my) :
+                                shopping = False
+                                running = False
+
+
+                            if bouton_sortir.est_survol(mx, my) :
                                 shopping = False
 
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_sortir_shop_survole = bouton_sortir_shop.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT//16)).collidepoint((mx, my))
-                            
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_sortir_shop.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT//16)).collidepoint((mx, my)):
-                                shopping = False
-
-                        if joueurs_choix[compteur_lancers].argent >= 300 :
-                            
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_achat_1_survole = bouton_achat_1.get_rect(center=((SCREEN_WIDTH//21)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my))
-
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_achat_1.get_rect(center=((SCREEN_WIDTH//21)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my)):
+                            if joueurs_choix[compteur_lancers].argent >= 300 :
+                        
+                                if bouton_achat_attaque.est_survol(mx, my) :
                                     joueurs_choix[compteur_lancers].attaque += 10
                                     joueurs_choix[compteur_lancers].argent -= 300
-                                    bouton_achat_1_survole = False
+                                    bouton_achat_attaque.hovered = False
 
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_achat_2_survole = bouton_achat_2.get_rect(center=((SCREEN_WIDTH//3.52)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my))
-
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_achat_2.get_rect(center=((SCREEN_WIDTH//3.52)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my)):
+                                if bouton_achat_magie.est_survol(mx, my) :
                                     joueurs_choix[compteur_lancers].magie += 10
                                     joueurs_choix[compteur_lancers].argent -= 300
-                                    bouton_achat_2_survole = False
+                                    bouton_achat_magie.hovered = False
 
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_achat_3_survole = bouton_achat_3.get_rect(center=((SCREEN_WIDTH//1.92)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my))
+                            if joueurs_choix[compteur_lancers].argent >= 200 :
 
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_achat_3.get_rect(center=((SCREEN_WIDTH//1.92)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my)):
+                                if bouton_achat_vitesse.est_survol(mx, my) :
                                     joueurs_choix[compteur_lancers].vitesse += 10
-                                    joueurs_choix[compteur_lancers].argent -= 300
-                                    bouton_achat_3_survole = False
+                                    joueurs_choix[compteur_lancers].argent -= 200
+                                    bouton_achat_vitesse.hovered = False
 
-                        if joueurs_choix[compteur_lancers].argent >= 100 :
+                            if joueurs_choix[compteur_lancers].argent >= 100 :
 
-                            if event.type == pygame.MOUSEMOTION: 
-                                mx, my = pygame.mouse.get_pos()
-                                bouton_achat_4_survole = bouton_achat_4.get_rect(center=((SCREEN_WIDTH//1.32)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my))
-
-                            if event.type == pygame.MOUSEBUTTONDOWN:
-                                if bouton_achat_4.get_rect(center=((SCREEN_WIDTH//1.32)+(SCREEN_WIDTH//5)//2, (SCREEN_HEIGHT//4)+(SCREEN_HEIGHT//2)//2)).collidepoint((mx, my)):
+                                if bouton_achat_potion.est_survol(mx, my) :
                                     joueurs_choix[compteur_lancers].potion += 1
                                     joueurs_choix[compteur_lancers].argent -= 100
-                                    bouton_achat_4_survole = False
+                                    bouton_achat_potion.hovered = False
 
                     bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
+                    bouton_sortir.bouton_actuelle = bouton_sortir.bouton_survol if bouton_sortir.hovered else bouton_sortir.bouton_normale
 
                     bouton_quitter.dessiner(screen)
+                    bouton_sortir.dessiner(screen)
 
                     pygame.display.flip()
                     pygame.time.Clock().tick(FPS)
@@ -419,16 +409,30 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                 lancer_fait = False
                 ouvrir_shop = False
                 
-
             # Combat final        
             if ouvrir_piege_doree :
                 combatMonstre.combatMonstre(joueurs_choix, dragon, 0, monstre_battu, choix)
                 sys.exit()
 
-
         bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
 
         bouton_quitter.dessiner(screen)
+
+        if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
+            bouton_potion.bouton_actuelle = bouton_potion.bouton_survol if bouton_potion.hovered else bouton_potion.bouton_normale
+
+            bouton_potion.dessiner(screen)
+
+        if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
+            bouton_shop.bouton_actuelle = bouton_shop.bouton_survol if bouton_shop.hovered else bouton_shop.bouton_normale
+
+            bouton_shop.dessiner(screen)
+            
+        if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :  
+            bouton_piege_doree.bouton_actuelle = bouton_piege_doree.bouton_survol if bouton_piege_doree.hovered else bouton_piege_doree.bouton_normale
+
+            bouton_piege_doree.dessiner(screen)
+
 
         barre_joueur.afficher_barre_vie(screen)
 
@@ -441,5 +445,5 @@ if __name__ == "__main__":
     graphe = None
     joueurs_choix = []
     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
-    joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
+    # joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
     affichageGraphique(choix, graphe, joueurs_choix) 
