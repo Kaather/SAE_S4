@@ -9,6 +9,8 @@ from bouton import *
 import combatMonstre
 import time
 import statistique
+from ia_deplacement import *
+from ia_combat import * 
 
 pygame.init()
 
@@ -23,9 +25,8 @@ clock = pygame.time.Clock()
 FPS = 60
  
 
-def affichageGraphique(choix, graphe, joueurs_choix) :
+def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
     duree = 0
-    monstre_tue = 0
     nombre_tour = 0
     # Calcul de la durée de la partie
     time_start = time.time()
@@ -153,8 +154,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
         afficherJoueursLaby(joueurs_choix)
 
-        cercle_joueur = Cercle(RED, joueurs_choix[compteur_lancers].position[0] * (SCREEN_HEIGHT//13.8) + (SCREEN_WIDTH // 3.35), joueurs_choix[compteur_lancers].position[1] * (SCREEN_HEIGHT//13.8) + (SCREEN_HEIGHT // 8.8), 20, 3)
-
         # Affichage du menu stats / objet d'un joueur
 
         fond_player = pygame.Surface((SCREEN_WIDTH//4.3, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -179,12 +178,7 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         draw_text(f"Potion   :   {joueurs_choix[compteur_lancers].potion}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.5, BLACK)
         draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.6, BLACK)
         draw_text(f"Dé résultat : {de_resultat}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.7, BLACK)
-        draw_text(f"Attaque  :   {joueurs_choix[compteur_lancers].attaque}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.2, BLACK)
-        draw_text(f"Magie   :   {joueurs_choix[compteur_lancers].magie}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.3, BLACK)
-        draw_text(f"Vitesse   :   {joueurs_choix[compteur_lancers].vitesse}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.4, BLACK)
-        draw_text(f"Potion   :   {joueurs_choix[compteur_lancers].potion}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.07, SCREEN_HEIGHT*0.5, BLACK)
-        draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.6, BLACK)
-        draw_text(f"Dé résultat : {de_resultat}", SCREEN_WIDTH//43, SCREEN_WIDTH*0.075, SCREEN_HEIGHT*0.7, BLACK)
+
 
         # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
         if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
@@ -213,10 +207,14 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
         for piege_position in piege_positions:
             x, y = piege_position
             screen.blit(piege_images[piege_positions.index(piege_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//36)))
-            screen.blit(piege_images[piege_positions.index(piege_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//36)))
     
         for piege_doree_position in piege_doree_positions:
             x, y = piege_doree_position
+            screen.blit(piege_doree_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//36)))
+
+        for shop_position in shop_positions :
+            x, y = shop_position
+            screen.blit(shop_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.49) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 11) - (SCREEN_HEIGHT//36)))
             screen.blit(piege_doree_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//36)))
 
         for shop_position in shop_positions :
@@ -238,7 +236,6 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
             pointRouge = Point((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8))
             pointRouge.draw((RED), (SCREEN_HEIGHT//150))
 
-
         for y in range(laby.getHauteur()):
             for x in range(laby.getLargeur()):
                 base_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.63)
@@ -248,246 +245,251 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                     carre_ombre = RectangleOmbre(BLACK, base_x, base_y, SCREEN_HEIGHT//13.8, SCREEN_HEIGHT//13.8)
                     carre_ombre.draw()
 
+        if vrai_joueur[compteur_lancers]:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                    
+                if event.type == pygame.MOUSEMOTION:
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-                
-            if event.type == pygame.MOUSEMOTION:
-
-                mx, my = pygame.mouse.get_pos()
-                bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
-     
-            if event.type == pygame.MOUSEBUTTONDOWN:
-
-                if bouton_quitter.est_survol(mx, my):
-                    running = False
-
-                mx, my = pygame.mouse.get_pos()
-
-                for case in cases_accessibles:
-                    x, y = case
-                    point_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.45)
-                    point_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 9.2)
-                    point_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.45)
-                    point_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 9.2)
-
-
-                    if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):                           
-                        nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
-                        joueurs_choix[compteur_lancers].position = case
-
-                        if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
-                            verifier_piege(case, piege_positions, piege_images)
-                            joueurs_piegee = True
-
-                        cases_accessibles = []
-                        compteur_lancers += 1
-                        if compteur_lancers >= len(joueurs_choix):
-                            compteur_lancers = 0
-                            nombre_tour += 1
-                        lancer_fait = False
-                        break
-
-            if potion_possible == True :
-
-                if event.type == pygame.MOUSEMOTION: 
                     mx, my = pygame.mouse.get_pos()
-                    bouton_potion.hovered = bouton_potion.est_survol(mx, my)
-                
+                    bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
+        
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bouton_potion.est_survol(mx, my):
-                        joueurs_choix[compteur_lancers].utiliser_potion()
-                        potion_possible = False
-                    
-                    
-            if joueurs_piegee == True :
-                for joueur in joueurs_choix:
-                    joueur.position = case
-                choix_monstre = random.choice(monstre)
-                monstre.remove(choix_monstre)
-                combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix)
-                joueurs_piegee = False
-                compteur_lancers = 0
-                monstre_battu += 1
-            
-            # Dans le shop        
-            if ouvrir_shop :
-                shopping = True
-                while shopping :
+
+                    if bouton_quitter.est_survol(mx, my):
+                        running = False
 
                     mx, my = pygame.mouse.get_pos()
 
-                    shop_map_image = pygame.image.load('img/map/mapShop.png').convert()
-                    shop_map_image = pygame.transform.scale(shop_map_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-                    screen.blit(shop_map_image, (0, 0))
+                    for case in cases_accessibles:
+                        x, y = case
+                        point_x = (x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.45)
+                        point_y = (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 9.2)
 
-                    joueur_image = pygame.image.load(joueurs_choix[compteur_lancers].image).convert_alpha()
-                    joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//8, SCREEN_WIDTH//8))
-                    screen.blit(joueur_image, (SCREEN_WIDTH*0.325, SCREEN_HEIGHT*0.65))
 
-                    bouton_achat_attaque.bouton_actuelle = bouton_achat_attaque.bouton_survol if bouton_achat_attaque.hovered else bouton_achat_attaque.bouton_normale
-                    bouton_achat_magie.bouton_actuelle = bouton_achat_magie.bouton_survol if bouton_achat_magie.hovered else bouton_achat_magie.bouton_normale
-                    bouton_achat_vitesse.bouton_actuelle = bouton_achat_vitesse.bouton_survol if bouton_achat_vitesse.hovered else bouton_achat_vitesse.bouton_normale
-                    bouton_achat_potion.bouton_actuelle = bouton_achat_potion.bouton_survol if bouton_achat_potion.hovered else bouton_achat_potion.bouton_normale
+                        if point_x - (SCREEN_HEIGHT//60) <= mx <= point_x + (SCREEN_HEIGHT//20) and point_y - (SCREEN_HEIGHT//35) <= my <= point_y + (SCREEN_HEIGHT//30):                           
+                            nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                            joueurs_choix[compteur_lancers].position = case
 
-                    bouton_achat_attaque.dessiner(screen)
-                    bouton_achat_magie.dessiner(screen)
-                    bouton_achat_vitesse.dessiner(screen)
-                    bouton_achat_potion.dessiner(screen)
+                            if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
+                                verifier_piege(case, piege_positions, piege_images)
+                                joueurs_piegee = True
 
-                    draw_text("+ 10 Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH//7, SCREEN_HEIGHT//1.55, BLACK)
-                    draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//6.8, SCREEN_HEIGHT//1.43, BLACK)
-
-                    draw_text("+ 10 Magie", SCREEN_WIDTH//35, SCREEN_WIDTH//2.65, SCREEN_HEIGHT//1.55, BLACK)
-                    draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//2.6, SCREEN_HEIGHT//1.43, BLACK)
-
-                    draw_text("+ 10 Vitesse", SCREEN_WIDTH//35, SCREEN_WIDTH//1.62, SCREEN_HEIGHT//1.55, BLACK)
-                    draw_text("200$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.61, SCREEN_HEIGHT//1.43, BLACK)
-
-                    draw_text("+ 1 Potion", SCREEN_WIDTH//35, SCREEN_WIDTH//1.175, SCREEN_HEIGHT//1.55, BLACK)
-                    draw_text("100$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.17, SCREEN_HEIGHT//1.43, BLACK)
-
-                    shop_attaque_image = pygame.image.load('img/element/attaque.png').convert()
-                    shop_attaque_image = pygame.transform.scale(shop_attaque_image, (SCREEN_WIDTH//3.5, SCREEN_WIDTH//3.5))
-                    shop_attaque_image.set_colorkey(BLACK)
-                    screen.blit(shop_attaque_image, (SCREEN_WIDTH//1000, SCREEN_WIDTH//10))
+                            cases_accessibles = []
+                            compteur_lancers += 1
+                            if compteur_lancers >= len(joueurs_choix):
+                                compteur_lancers = 0
+                                nombre_tour += 1
+                            lancer_fait = False
+                            break
+                            
+                if potion_possible == True :
+                    if event.type == pygame.MOUSEMOTION: 
+                        mx, my = pygame.mouse.get_pos()
+                        bouton_potion.hovered = bouton_potion.est_survol(mx, my)
                     
-                    shop_magie_image = pygame.image.load('img/element/magie.png').convert()
-                    shop_magie_image = pygame.transform.scale(shop_magie_image, (SCREEN_WIDTH//6, SCREEN_WIDTH//6))
-                    shop_magie_image.set_colorkey(BLACK)
-                    screen.blit(shop_magie_image, (SCREEN_WIDTH//3.34, SCREEN_WIDTH//6.3))
-                    
-                    shop_vitesse_image = pygame.image.load('img/element/vitesse.png').convert()
-                    shop_vitesse_image = pygame.transform.scale(shop_vitesse_image, (SCREEN_WIDTH//4.7, SCREEN_WIDTH//4.7))
-                    shop_vitesse_image.set_colorkey(BLACK)
-                    screen.blit(shop_vitesse_image, (SCREEN_WIDTH//1.91, SCREEN_WIDTH//7))
-
-                    shop_potion_image = pygame.image.load('img/element/Potion.png').convert()
-                    shop_potion_image = pygame.transform.scale(shop_potion_image, (SCREEN_WIDTH//5.5, SCREEN_WIDTH//5.5))
-                    shop_potion_image.set_colorkey(BLACK)
-                    screen.blit(shop_potion_image, (SCREEN_WIDTH//1.315, SCREEN_WIDTH//6.5))
-
-                    draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//30, SCREEN_WIDTH//8, SCREEN_HEIGHT//40, BLACK)
-
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if bouton_potion.est_survol(mx, my):
+                            joueurs_choix[compteur_lancers].utiliser_potion()
+                            potion_possible = False
                         
-                        if event.type == pygame.MOUSEMOTION: 
-                            mx, my = pygame.mouse.get_pos()
-                            bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
-                            bouton_sortir.hovered = bouton_sortir.est_survol(mx, my)
+                        
+                if joueurs_piegee == True :
+                    for joueur in joueurs_choix:
+                        joueur.position = case
+                    choix_monstre = random.choice(monstre)
+                    monstre.remove(choix_monstre)
+                    combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix)
+                    joueurs_piegee = False
+                    compteur_lancers = 0
+                    monstre_battu += 1
+                
+                # Dans le shop        
+                if ouvrir_shop :
+                    shopping = True
+                    while shopping :
 
-                            if joueurs_choix[compteur_lancers].argent >= 300 :
+                        mx, my = pygame.mouse.get_pos()
 
-                                bouton_achat_attaque.hovered = bouton_achat_attaque.est_survol(mx, my)
-                                bouton_achat_magie.hovered = bouton_achat_magie.est_survol(mx, my)
+                        shop_map_image = pygame.image.load('img/map/mapShop.png').convert()
+                        shop_map_image = pygame.transform.scale(shop_map_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+                        screen.blit(shop_map_image, (0, 0))
 
-                            if joueurs_choix[compteur_lancers].argent >= 200 :
+                        joueur_image = pygame.image.load(joueurs_choix[compteur_lancers].image).convert_alpha()
+                        joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//8, SCREEN_WIDTH//8))
+                        screen.blit(joueur_image, (SCREEN_WIDTH*0.325, SCREEN_HEIGHT*0.65))
 
-                                bouton_achat_vitesse.hovered = bouton_achat_vitesse.est_survol(mx, my)
+                        bouton_achat_attaque.bouton_actuelle = bouton_achat_attaque.bouton_survol if bouton_achat_attaque.hovered else bouton_achat_attaque.bouton_normale
+                        bouton_achat_magie.bouton_actuelle = bouton_achat_magie.bouton_survol if bouton_achat_magie.hovered else bouton_achat_magie.bouton_normale
+                        bouton_achat_vitesse.bouton_actuelle = bouton_achat_vitesse.bouton_survol if bouton_achat_vitesse.hovered else bouton_achat_vitesse.bouton_normale
+                        bouton_achat_potion.bouton_actuelle = bouton_achat_potion.bouton_survol if bouton_achat_potion.hovered else bouton_achat_potion.bouton_normale
 
-                            if joueurs_choix[compteur_lancers].argent >= 100 :
+                        bouton_achat_attaque.dessiner(screen)
+                        bouton_achat_magie.dessiner(screen)
+                        bouton_achat_vitesse.dessiner(screen)
+                        bouton_achat_potion.dessiner(screen)
+
+                        draw_text("+ 10 Attaque", SCREEN_WIDTH//35, SCREEN_WIDTH//7, SCREEN_HEIGHT//1.55, BLACK)
+                        draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//6.8, SCREEN_HEIGHT//1.43, BLACK)
+
+                        draw_text("+ 10 Magie", SCREEN_WIDTH//35, SCREEN_WIDTH//2.65, SCREEN_HEIGHT//1.55, BLACK)
+                        draw_text("300$", SCREEN_WIDTH//50, SCREEN_WIDTH//2.6, SCREEN_HEIGHT//1.43, BLACK)
+
+                        draw_text("+ 10 Vitesse", SCREEN_WIDTH//35, SCREEN_WIDTH//1.62, SCREEN_HEIGHT//1.55, BLACK)
+                        draw_text("200$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.61, SCREEN_HEIGHT//1.43, BLACK)
+
+                        draw_text("+ 1 Potion", SCREEN_WIDTH//35, SCREEN_WIDTH//1.175, SCREEN_HEIGHT//1.55, BLACK)
+                        draw_text("100$", SCREEN_WIDTH//50, SCREEN_WIDTH//1.17, SCREEN_HEIGHT//1.43, BLACK)
+
+                        shop_attaque_image = pygame.image.load('img/element/attaque.png').convert()
+                        shop_attaque_image = pygame.transform.scale(shop_attaque_image, (SCREEN_WIDTH//3.5, SCREEN_WIDTH//3.5))
+                        shop_attaque_image.set_colorkey(BLACK)
+                        screen.blit(shop_attaque_image, (SCREEN_WIDTH//1000, SCREEN_WIDTH//10))
+                        
+                        shop_magie_image = pygame.image.load('img/element/magie.png').convert()
+                        shop_magie_image = pygame.transform.scale(shop_magie_image, (SCREEN_WIDTH//6, SCREEN_WIDTH//6))
+                        shop_magie_image.set_colorkey(BLACK)
+                        screen.blit(shop_magie_image, (SCREEN_WIDTH//3.34, SCREEN_WIDTH//6.3))
+                        
+                        shop_vitesse_image = pygame.image.load('img/element/vitesse.png').convert()
+                        shop_vitesse_image = pygame.transform.scale(shop_vitesse_image, (SCREEN_WIDTH//4.7, SCREEN_WIDTH//4.7))
+                        shop_vitesse_image.set_colorkey(BLACK)
+                        screen.blit(shop_vitesse_image, (SCREEN_WIDTH//1.91, SCREEN_WIDTH//7))
+
+                        shop_potion_image = pygame.image.load('img/element/Potion.png').convert()
+                        shop_potion_image = pygame.transform.scale(shop_potion_image, (SCREEN_WIDTH//5.5, SCREEN_WIDTH//5.5))
+                        shop_potion_image.set_colorkey(BLACK)
+                        screen.blit(shop_potion_image, (SCREEN_WIDTH//1.315, SCREEN_WIDTH//6.5))
+
+                        draw_text(f"Argent   :   {joueurs_choix[compteur_lancers].argent}", SCREEN_WIDTH//30, SCREEN_WIDTH//8, SCREEN_HEIGHT//40, BLACK)
+
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                sys.exit()
+                            
+                            if event.type == pygame.MOUSEMOTION: 
+                                mx, my = pygame.mouse.get_pos()
+                                bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
+                                bouton_sortir.hovered = bouton_sortir.est_survol(mx, my)
+
+                                if joueurs_choix[compteur_lancers].argent >= 300 :
+
+                                    bouton_achat_attaque.hovered = bouton_achat_attaque.est_survol(mx, my)
+                                    bouton_achat_magie.hovered = bouton_achat_magie.est_survol(mx, my)
+
+                                if joueurs_choix[compteur_lancers].argent >= 200 :
+
+                                    bouton_achat_vitesse.hovered = bouton_achat_vitesse.est_survol(mx, my)
+
+                                if joueurs_choix[compteur_lancers].argent >= 100 :
+                                    
+                                    bouton_achat_potion.hovered = bouton_achat_potion.est_survol(mx, my)
+
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                if bouton_quitter.est_survol(mx, my) :
+                                    shopping = False
+                                    running = False
+
+
+                                if bouton_sortir.est_survol(mx, my) :
+                                    shopping = False
+
+                                if joueurs_choix[compteur_lancers].argent >= 300 :
+                            
+                                    if bouton_achat_attaque.est_survol(mx, my) :
+                                        joueurs_choix[compteur_lancers].attaque += 10
+                                        joueurs_choix[compteur_lancers].argent -= 300
+                                        bouton_achat_attaque.hovered = False
+
+                                    if bouton_achat_magie.est_survol(mx, my) :
+                                        joueurs_choix[compteur_lancers].magie += 10
+                                        joueurs_choix[compteur_lancers].argent -= 300
+                                        bouton_achat_magie.hovered = False
+
+                                if joueurs_choix[compteur_lancers].argent >= 200 :
+
+                                    if bouton_achat_vitesse.est_survol(mx, my) :
+                                        joueurs_choix[compteur_lancers].vitesse += 10
+                                        joueurs_choix[compteur_lancers].argent -= 200
+                                        bouton_achat_vitesse.hovered = False
+
+                                if joueurs_choix[compteur_lancers].argent >= 100 :
+
+                                    if bouton_achat_potion.est_survol(mx, my) :
+                                        joueurs_choix[compteur_lancers].potion += 1
+                                        joueurs_choix[compteur_lancers].argent -= 100
+                                        bouton_achat_potion.hovered = False
+
+                        bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
+                        bouton_sortir.bouton_actuelle = bouton_sortir.bouton_survol if bouton_sortir.hovered else bouton_sortir.bouton_normale
+
+                        bouton_quitter.dessiner(screen)
+                        bouton_sortir.dessiner(screen)
+
+                        pygame.display.flip()
+                        pygame.time.Clock().tick(FPS)
+
+                    compteur_lancers += 1
+                    if compteur_lancers >= len(joueurs_choix):
+                        compteur_lancers = 0
+                        nombre_tour += 1
                                 
-                                bouton_achat_potion.hovered = bouton_achat_potion.est_survol(mx, my)
-
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            if bouton_quitter.est_survol(mx, my) :
-                                shopping = False
-                                running = False
-
-
-                            if bouton_sortir.est_survol(mx, my) :
-                                shopping = False
-
-                            if joueurs_choix[compteur_lancers].argent >= 300 :
+                    lancer_fait = False
+                    ouvrir_shop = False
+                    
+                # Combat final        
+                if ouvrir_piege_doree :
+                    choix_boss = random.choice(boss)
+                    if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix):
+                        # calcul de la durée total de la partie
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        partie_finie = True
+                        monstre_battu = 6
+                    else:
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False   
+                        partie_finie = False
                         
-                                if bouton_achat_attaque.est_survol(mx, my) :
-                                    joueurs_choix[compteur_lancers].attaque += 10
-                                    joueurs_choix[compteur_lancers].argent -= 300
-                                    bouton_achat_attaque.hovered = False
+                        
+                    statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
+                    sys.exit()
 
-                                if bouton_achat_magie.est_survol(mx, my) :
-                                    joueurs_choix[compteur_lancers].magie += 10
-                                    joueurs_choix[compteur_lancers].argent -= 300
-                                    bouton_achat_magie.hovered = False
+            bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
 
-                            if joueurs_choix[compteur_lancers].argent >= 200 :
+            bouton_quitter.dessiner(screen)
 
-                                if bouton_achat_vitesse.est_survol(mx, my) :
-                                    joueurs_choix[compteur_lancers].vitesse += 10
-                                    joueurs_choix[compteur_lancers].argent -= 200
-                                    bouton_achat_vitesse.hovered = False
+            if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
+                bouton_potion.bouton_actuelle = bouton_potion.bouton_survol if bouton_potion.hovered else bouton_potion.bouton_normale
 
-                            if joueurs_choix[compteur_lancers].argent >= 100 :
+                bouton_potion.dessiner(screen)
 
-                                if bouton_achat_potion.est_survol(mx, my) :
-                                    joueurs_choix[compteur_lancers].potion += 1
-                                    joueurs_choix[compteur_lancers].argent -= 100
-                                    bouton_achat_potion.hovered = False
+            if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
+                bouton_shop.bouton_actuelle = bouton_shop.bouton_survol if bouton_shop.hovered else bouton_shop.bouton_normale
 
-                    bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
-                    bouton_sortir.bouton_actuelle = bouton_sortir.bouton_survol if bouton_sortir.hovered else bouton_sortir.bouton_normale
+                bouton_shop.dessiner(screen)
+                
+            if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :  
+                bouton_piege_doree.bouton_actuelle = bouton_piege_doree.bouton_survol if bouton_piege_doree.hovered else bouton_piege_doree.bouton_normale
 
-                    bouton_quitter.dessiner(screen)
-                    bouton_sortir.dessiner(screen)
+                bouton_piege_doree.dessiner(screen)
 
-                    pygame.display.flip()
-                    pygame.time.Clock().tick(FPS)
-
+        else:
+            if difficulte == "Facile":
+                deplacement_facile()
+                
+                
                 compteur_lancers += 1
                 if compteur_lancers >= len(joueurs_choix):
-                    compteur_lancers = 0
-                    nombre_tour += 1
-                            
-                lancer_fait = False
-                ouvrir_shop = False
-                
-            # Combat final        
-            if ouvrir_piege_doree :
-                choix_boss = random.choice(boss)
-                if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix):
-                    # calcul de la durée total de la partie
-                    time_end = time.time()
-                    duree = time_end - time_start
-                    running = False
-                    partie_finie = True
-                    monstre_battu = 6
-                else:
-                    time_end = time.time()
-                    duree = time_end - time_start
-                    running = False   
-                    partie_finie = False
-                    
-                    
-                statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
-                sys.exit()
-
-        cercle_joueur.draw()
-
-        bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
-
-        bouton_quitter.dessiner(screen)
-
-        if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
-            bouton_potion.bouton_actuelle = bouton_potion.bouton_survol if bouton_potion.hovered else bouton_potion.bouton_normale
-
-            bouton_potion.dessiner(screen)
-
-        if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
-            bouton_shop.bouton_actuelle = bouton_shop.bouton_survol if bouton_shop.hovered else bouton_shop.bouton_normale
-
-            bouton_shop.dessiner(screen)
-            
-        if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :  
-            bouton_piege_doree.bouton_actuelle = bouton_piege_doree.bouton_survol if bouton_piege_doree.hovered else bouton_piege_doree.bouton_normale
-
-            bouton_piege_doree.dessiner(screen)
-
-
+                        compteur_lancers = 0
+                        nombre_tour += 1
+                        
+                        
         barre_joueur.afficher_barre_vie(screen)
 
         pygame.display.flip()
@@ -499,7 +501,5 @@ if __name__ == "__main__":
     graphe = None
     joueurs_choix = []
     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
-    joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))
-    joueurs_choix.append(Joueur("Berserk", graphe, (5,10), 120, 120, 20, 10, 15, 3, 100, "img/classe/Berserk.png"))  
-    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Mage.png"))              
+    # joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
     affichageGraphique(choix, graphe, joueurs_choix) 

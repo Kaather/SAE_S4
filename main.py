@@ -480,26 +480,33 @@ def nb_joueurs():
     if not classes:
         return
 
-    fonction_joueurs(classes)
+    vrai_joueur = fonction_joueurs(classes)
+    
+    difficulte = choix_difficulte()
 
     if classes:
         for player in range(len(classes)):
             archetypes(player + 1, graphe)
-        print(joueurs_choix)
-        map_choix(graphe, joueurs_choix)
+        map_choix(graphe, joueurs_choix, difficulte, vrai_joueur)
         
 def fonction_joueurs(classes):
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Fonction des joueurs")
+
     graphe = None
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     running = True
+    checkboxes = []
+
+    checkbox_humain_checked = [False] * len(classes)
+    checkbox_ordinateur_checked = [False] * len(classes)
+
     while running:
-
         screen.blit(fond_image, (0, 0))
-        draw_text("Fonction des joueurs ?", 110, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.1, BLACK)
-
         mx, my = pygame.mouse.get_pos()
 
         bouton_1 = pygame.Surface((SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10), pygame.SRCALPHA)
@@ -529,37 +536,22 @@ def fonction_joueurs(classes):
         start_y = int(SCREEN_HEIGHT * 0.60)
         vertical_spacing = 70
 
-        # Joueur 1
-        checkbox_1 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y), 10)
-        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10, BLACK)
-        checkbox_2 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y + vertical_spacing), 10)
-        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10 + vertical_spacing, BLACK)
-        checkbox_3 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y + 2 * vertical_spacing), 10)
-        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+        checkboxes = []
 
-        # Joueur 2
-        checkbox_4 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y), 10)
-        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10, BLACK)
-        checkbox_5 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y + vertical_spacing), 10)
-        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10 + vertical_spacing, BLACK)
-        checkbox_6 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y + 2 * vertical_spacing), 10)
-        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+        for i in range(len(classes)):
+            color_humain = BROWN if checkbox_humain_checked[i] else BROWN_TR
+            color_ordinateur = BROWN if checkbox_ordinateur_checked[i] else BROWN_TR
 
-        # Joueur 3
-        checkbox_7 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y), 10)
-        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10, BLACK)
-        checkbox_8 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y + vertical_spacing), 10)
-        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10 + vertical_spacing, BLACK)
-        checkbox_9 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y + 2 * vertical_spacing), 10)
-        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+            checkbox_humain = pygame.draw.circle(screen, color_humain, (int(SCREEN_WIDTH * (0.07 + i * 0.253)), start_y), 10)
+            if checkbox_humain_checked[i]:
+                draw_text("X", 20, int(SCREEN_WIDTH * (0.07 + i * 0.253)) + 15, start_y - 10, BLACK)
+            draw_text("Humain", 20, int(SCREEN_WIDTH * (0.12 + i * 0.253)) + 20, start_y - 10, BLACK)
+            checkbox_ordinateur = pygame.draw.circle(screen, color_ordinateur, (int(SCREEN_WIDTH * (0.07 + i * 0.253)), start_y + vertical_spacing), 10)
+            if checkbox_ordinateur_checked[i]:
+                draw_text("X", 20, int(SCREEN_WIDTH * (0.07 + i * 0.253)) + 15, start_y - 10 + vertical_spacing, BLACK)
+            draw_text("Ordinateur", 20, int(SCREEN_WIDTH * (0.12 + i * 0.253)) + 20, start_y - 10 + vertical_spacing, BLACK)
 
-        # Joueur 4
-        checkbox_10 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y), 10)
-        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10, BLACK)
-        checkbox_11 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y + vertical_spacing), 10)
-        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10 + vertical_spacing, BLACK)
-        checkbox_12 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y + 2 * vertical_spacing), 10)
-        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+            checkboxes.append((checkbox_humain, checkbox_ordinateur))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -568,38 +560,21 @@ def fonction_joueurs(classes):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_5.get_rect(center=(SCREEN_WIDTH * 0.965, SCREEN_HEIGHT * 0.015)).collidepoint((mx, my)):
                     running = False
-                
-                if checkbox_1.collidepoint(mx, my):
-                    print("Bouton joueur 1 : Humain")
-                elif checkbox_2.collidepoint(mx, my):
-                    print("Bouton joueur 1 : Ordinateur")
-                elif checkbox_3.collidepoint(mx, my):
-                    print("Bouton joueur 1 : Non joué")
-                elif checkbox_4.collidepoint(mx, my):
-                    print("Bouton joueur 2 : Humain")
-                elif checkbox_5.collidepoint(mx, my):
-                    print("Bouton joueur 2 : Ordinateur")
-                elif checkbox_6.collidepoint(mx, my):
-                    print("Bouton joueur 2 : Non joué")
-                elif checkbox_7.collidepoint(mx, my):
-                    print("Bouton joueur 3 : Humain")
-                elif checkbox_8.collidepoint(mx, my):
-                    print("Bouton joueur 3 : Ordinateur")
-                elif checkbox_9.collidepoint(mx, my):
-                    print("Bouton joueur 3 : Non joué")
-                elif checkbox_10.collidepoint(mx, my):
-                    print("Bouton joueur 4 : Humain")
-                elif checkbox_11.collidepoint(mx, my):
-                    print("Bouton joueur 4 : Ordinateur")
-                elif checkbox_12.collidepoint(mx, my):
-                    print("Bouton joueur 4 : Non joué")
+
+                for i, (checkbox_humain, checkbox_ordinateur) in enumerate(checkboxes):
+                    if checkbox_humain.collidepoint(mx, my):
+                        checkbox_humain_checked[i] = True
+                        checkbox_ordinateur_checked[i] = False
+                    elif checkbox_ordinateur.collidepoint(mx, my):
+                        checkbox_ordinateur_checked[i] = True
+                        checkbox_humain_checked[i] = False
 
         pygame.display.update()
 
-    difficulte = choix_difficulte()
-
     if not classes:
         return
+    
+    return checkbox_humain_checked
     
 def archetypes(number, graphe) :
 
@@ -720,7 +695,7 @@ def archetypes(number, graphe) :
     return joueurs_choix
 
 
-def map_choix(graphe, joueurs_choix) :
+def map_choix(graphe, joueurs_choix, difficulte, vrai_joueur) :
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -752,19 +727,19 @@ def map_choix(graphe, joueurs_choix) :
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if bouton_desert.est_survol(mx, my):
-                    affichageGraphique(0, graphe, joueurs_choix)
+                    affichageGraphique(0, graphe, joueurs_choix, difficulte, vrai_joueur)
                     running = False
 
                 if bouton_neige.est_survol(mx, my):
-                    affichageGraphique(1, graphe, joueurs_choix)
+                    affichageGraphique(1, graphe, joueurs_choix, difficulte, vrai_joueur)
                     running = False
 
                 if bouton_foret.est_survol(mx, my):
-                    affichageGraphique(2, graphe, joueurs_choix)
+                    affichageGraphique(2, graphe, joueurs_choix, difficulte, vrai_joueur)
                     running = False
 
                 if bouton_donjon.est_survol(mx, my):
-                    affichageGraphique(3, graphe, joueurs_choix)
+                    affichageGraphique(3, graphe, joueurs_choix, difficulte, vrai_joueur)
                     running = False
 
         bouton_desert.bouton_actuelle = bouton_desert.bouton_survol if bouton_desert.hovered else bouton_desert.bouton_normale
