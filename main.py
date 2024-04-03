@@ -7,9 +7,11 @@ from jeuGraphique import *
 from jeuGraphiqueReseau import *
 from bouton import *
 from ia_deplacement import *
+from ia_combat import * 
 import socket
 import time
 import os
+import ia_combat
 
 
 pygame.init()
@@ -124,64 +126,6 @@ def nb_joueurs_multi(socket, numero):
                         print("Erreur de réception des données:", e)
                         continue              
         map_choix_multi(graphe, joueurs_choix, numero, socket)
-
-def choix_difficulte():
-
-    fond_image = pygame.image.load('img/map/donjon.png').convert()
-    fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-    bouton_facile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.2, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Facile", SCREEN_WIDTH//25)
-    bouton_moyen = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Moyen", SCREEN_WIDTH//25)
-    bouton_difficile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.8, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Difficile", SCREEN_WIDTH//25)
-
-    difficulte = None
-
-    running = True
-    while running:
-        screen.blit(fond_image, (0, 0))
-        draw_text("Choisissez la difficulté :", SCREEN_WIDTH//16, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
-        mx, my = pygame.mouse.get_pos()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEMOTION:
-                mx, my = pygame.mouse.get_pos()
-                bouton_facile.hovered = bouton_facile.est_survol(mx, my)
-                bouton_moyen.hovered = bouton_moyen.est_survol(mx, my)
-                bouton_difficile.hovered = bouton_difficile.est_survol(mx, my)
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_facile.est_survol(mx, my):
-                    difficulte = "Facile"
-                    running = False
-                    deplacement_facile()
-
-                if bouton_moyen.est_survol(mx, my):
-                    difficulte = "Moyen"
-                    running = False
-                    deplacement_intermediaire()
-
-                if bouton_difficile.est_survol(mx, my):
-                    difficulte = "Difficile"
-                    running = False
-                    deplacement_difficile()
-
-        bouton_facile.bouton_actuelle = bouton_facile.bouton_survol if bouton_facile.hovered else bouton_facile.bouton_normale
-        bouton_moyen.bouton_actuelle = bouton_moyen.bouton_survol if bouton_moyen.hovered else bouton_moyen.bouton_normale
-        bouton_difficile.bouton_actuelle = bouton_difficile.bouton_survol if bouton_difficile.hovered else bouton_difficile.bouton_normale
-
-        bouton_facile.dessiner(screen)
-        bouton_moyen.dessiner(screen)
-        bouton_difficile.dessiner(screen)
-
-        pygame.display.flip()
-        pygame.time.Clock().tick(FPS)
-
-    print(difficulte)
-    return difficulte
 
 def archetypes_multi(number, graphe, socket) :
 
@@ -400,8 +344,71 @@ def map_choix_multi(graphe, joueurs_choix, numero, socket):
                 continue
     time.sleep(2)
     affichageGraphiqueReseau(maps, graphe, joueurs_choix, socket, numero)
+    
+def choix_difficulte():
 
-def nb_joueurs() :
+    fond_image = pygame.image.load('img/map/donjon.png').convert()
+    fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    bouton_facile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.2, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Facile", SCREEN_WIDTH//25)
+    bouton_moyen = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Moyen", SCREEN_WIDTH//25)
+    bouton_difficile = Bouton(SCREEN_WIDTH//5, SCREEN_HEIGHT//10, SCREEN_WIDTH*0.8, SCREEN_HEIGHT*0.65, BROWN_TR, BROWN, "Difficile", SCREEN_WIDTH//25)
+
+    difficulte = None
+
+    running = True
+    while running:
+        screen.blit(fond_image, (0, 0))
+        draw_text("Choisissez la difficulté :", SCREEN_WIDTH//16, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.2, BLACK)
+        mx, my = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEMOTION:
+                mx, my = pygame.mouse.get_pos()
+                bouton_facile.hovered = bouton_facile.est_survol(mx, my)
+                bouton_moyen.hovered = bouton_moyen.est_survol(mx, my)
+                bouton_difficile.hovered = bouton_difficile.est_survol(mx, my)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_facile.est_survol(mx, my):
+                    difficulte = "Facile"
+                    running = False
+                    deplacement_facile()
+                    combat_facile()
+
+                if bouton_moyen.est_survol(mx, my):
+                    difficulte = "Moyen"
+                    running = False
+                    deplacement_intermediaire()
+                    combat_intermediaire()
+
+                if bouton_difficile.est_survol(mx, my):
+                    difficulte = "Difficile"
+                    running = False
+                    deplacement_difficile()
+                    combat_difficile()
+
+        bouton_facile.bouton_actuelle = bouton_facile.bouton_survol if bouton_facile.hovered else bouton_facile.bouton_normale
+        bouton_moyen.bouton_actuelle = bouton_moyen.bouton_survol if bouton_moyen.hovered else bouton_moyen.bouton_normale
+        bouton_difficile.bouton_actuelle = bouton_difficile.bouton_survol if bouton_difficile.hovered else bouton_difficile.bouton_normale
+
+        bouton_facile.dessiner(screen)
+        bouton_moyen.dessiner(screen)
+        bouton_difficile.dessiner(screen)
+
+        pygame.display.flip()
+        pygame.time.Clock().tick(FPS)
+
+    print(difficulte)
+    return difficulte
+
+def nb_joueurs():
+    global joueurs_choix
+    joueurs_choix = []
     graphe = None
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
@@ -473,14 +480,127 @@ def nb_joueurs() :
     if not classes:
         return
 
-    difficulte = choix_difficulte()
+    fonction_joueurs(classes)
 
     if classes:
         for player in range(len(classes)):
             archetypes(player + 1, graphe)
+        print(joueurs_choix)
         map_choix(graphe, joueurs_choix)
+        
+def fonction_joueurs(classes):
+    graphe = None
 
+    fond_image = pygame.image.load('img/map/donjon.png').convert()
+    fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    running = True
+    while running:
+
+        screen.blit(fond_image, (0, 0))
+        draw_text("Fonction des joueurs ?", 110, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.1, BLACK)
+
+        mx, my = pygame.mouse.get_pos()
+
+        bouton_1 = pygame.Surface((SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10), pygame.SRCALPHA)
+        bouton_2 = pygame.Surface((SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10), pygame.SRCALPHA)
+        bouton_3 = pygame.Surface((SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10), pygame.SRCALPHA)
+        bouton_4 = pygame.Surface((SCREEN_WIDTH // 5, SCREEN_HEIGHT // 10), pygame.SRCALPHA)
+        bouton_5 = pygame.Surface((SCREEN_WIDTH // 12.4, SCREEN_HEIGHT // 22), pygame.SRCALPHA)
+
+        bouton_1.fill(BROWN_TR if not bouton_1.get_rect(center=((SCREEN_WIDTH * 0.12), (SCREEN_HEIGHT * 0.400 + SCREEN_HEIGHT // 10 / 2))).collidepoint((mx, my)) else BROWN)
+        bouton_2.fill(BROWN_TR if not bouton_2.get_rect(center=((SCREEN_WIDTH * 0.373), (SCREEN_HEIGHT * 0.400 + SCREEN_HEIGHT // 10 / 2))).collidepoint((mx, my)) else BROWN)
+        bouton_3.fill(BROWN_TR if not bouton_3.get_rect(center=((SCREEN_WIDTH * 0.626), (SCREEN_HEIGHT * 0.400 + SCREEN_HEIGHT // 10 / 2))).collidepoint((mx, my)) else BROWN)
+        bouton_4.fill(BROWN_TR if not bouton_4.get_rect(center=((SCREEN_WIDTH * 0.88), (SCREEN_HEIGHT * 0.400 + SCREEN_HEIGHT // 10 / 2))).collidepoint((mx, my)) else BROWN)
+        bouton_5.fill(TRANSPARENT if not bouton_5.get_rect(center=((SCREEN_WIDTH * 0.965), SCREEN_HEIGHT * 0.015)).collidepoint((mx, my)) else BROWN)
+
+        screen.blit(bouton_1, ((SCREEN_WIDTH * 0.12) - (SCREEN_WIDTH // 5 / 2), SCREEN_HEIGHT * 0.40))
+        screen.blit(bouton_2, ((SCREEN_WIDTH * 0.373) - (SCREEN_WIDTH // 5 / 2), SCREEN_HEIGHT * 0.40))
+        screen.blit(bouton_3, ((SCREEN_WIDTH * 0.626) - (SCREEN_WIDTH // 5 / 2), SCREEN_HEIGHT * 0.40))
+        screen.blit(bouton_4, ((SCREEN_WIDTH * 0.88) - (SCREEN_WIDTH // 5 / 2), SCREEN_HEIGHT * 0.40))
+        screen.blit(bouton_5, ((SCREEN_WIDTH * 0.92), SCREEN_HEIGHT * (0.001)))
+
+        draw_text("Joueur 1", 51, SCREEN_WIDTH * 0.12, SCREEN_HEIGHT * 0.400, BLACK)
+        draw_text("Joueur 2", 51, SCREEN_WIDTH * 0.373, SCREEN_HEIGHT * 0.400, BLACK)
+        draw_text("Joueur 3", 51, SCREEN_WIDTH * 0.626, SCREEN_HEIGHT * 0.400, BLACK)
+        draw_text("Joueur 4", 51, SCREEN_WIDTH * 0.88, SCREEN_HEIGHT * 0.400, BLACK)
+        draw_text("Suivant", 30, SCREEN_WIDTH * 0.96, -5, BLACK)
+
+        start_y = int(SCREEN_HEIGHT * 0.60)
+        vertical_spacing = 70
+
+        # Joueur 1
+        checkbox_1 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y), 10)
+        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10, BLACK)
+        checkbox_2 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y + vertical_spacing), 10)
+        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10 + vertical_spacing, BLACK)
+        checkbox_3 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.07), start_y + 2 * vertical_spacing), 10)
+        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.12) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+
+        # Joueur 2
+        checkbox_4 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y), 10)
+        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10, BLACK)
+        checkbox_5 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y + vertical_spacing), 10)
+        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10 + vertical_spacing, BLACK)
+        checkbox_6 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.323), start_y + 2 * vertical_spacing), 10)
+        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.373) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+
+        # Joueur 3
+        checkbox_7 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y), 10)
+        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10, BLACK)
+        checkbox_8 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y + vertical_spacing), 10)
+        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10 + vertical_spacing, BLACK)
+        checkbox_9 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.576), start_y + 2 * vertical_spacing), 10)
+        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.626) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+
+        # Joueur 4
+        checkbox_10 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y), 10)
+        draw_text("Humain", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10, BLACK)
+        checkbox_11 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y + vertical_spacing), 10)
+        draw_text("Ordinateur", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10 + vertical_spacing, BLACK)
+        checkbox_12 = pygame.draw.circle(screen, BROWN, (int(SCREEN_WIDTH * 0.83), start_y + 2 * vertical_spacing), 10)
+        draw_text("Non joué", 20, int(SCREEN_WIDTH * 0.88) + 20, start_y - 10 + 2 * vertical_spacing, BLACK)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_5.get_rect(center=(SCREEN_WIDTH * 0.965, SCREEN_HEIGHT * 0.015)).collidepoint((mx, my)):
+                    running = False
+                
+                if checkbox_1.collidepoint(mx, my):
+                    print("Bouton joueur 1 : Humain")
+                elif checkbox_2.collidepoint(mx, my):
+                    print("Bouton joueur 1 : Ordinateur")
+                elif checkbox_3.collidepoint(mx, my):
+                    print("Bouton joueur 1 : Non joué")
+                elif checkbox_4.collidepoint(mx, my):
+                    print("Bouton joueur 2 : Humain")
+                elif checkbox_5.collidepoint(mx, my):
+                    print("Bouton joueur 2 : Ordinateur")
+                elif checkbox_6.collidepoint(mx, my):
+                    print("Bouton joueur 2 : Non joué")
+                elif checkbox_7.collidepoint(mx, my):
+                    print("Bouton joueur 3 : Humain")
+                elif checkbox_8.collidepoint(mx, my):
+                    print("Bouton joueur 3 : Ordinateur")
+                elif checkbox_9.collidepoint(mx, my):
+                    print("Bouton joueur 3 : Non joué")
+                elif checkbox_10.collidepoint(mx, my):
+                    print("Bouton joueur 4 : Humain")
+                elif checkbox_11.collidepoint(mx, my):
+                    print("Bouton joueur 4 : Ordinateur")
+                elif checkbox_12.collidepoint(mx, my):
+                    print("Bouton joueur 4 : Non joué")
+
+        pygame.display.update()
+
+    difficulte = choix_difficulte()
+
+    if not classes:
+        return
+    
 def archetypes(number, graphe) :
 
     fond_image = pygame.image.load('img/map/donjon.png').convert()
@@ -662,11 +782,10 @@ def map_choix(graphe, joueurs_choix) :
 
 
 def regles():
+    bouton_5_survole = False
 
     fond_image = pygame.image.load('img/map/desert.png').convert()
     fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-    bouton_quitter = Bouton(SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22, SCREEN_WIDTH//1.04, SCREEN_HEIGHT//50, TRANSPARENT, BROWN, "Quitter", SCREEN_WIDTH//45)
 
     running = True
     while running:
@@ -674,33 +793,120 @@ def regles():
         screen.blit(fond_image, (0, 0))
         mx, my = pygame.mouse.get_pos()
 
-        # Affichage des règles
-        draw_text("Règle 1", SCREEN_WIDTH//45, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.3, BLACK)
-        draw_text("Règle 2", SCREEN_WIDTH//45, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.4, BLACK)
-        draw_text("Règle 3", SCREEN_WIDTH//45, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5, BLACK)
-        draw_text("Règle 4", SCREEN_WIDTH//45, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.6, BLACK)
-        draw_text("Règle 5", SCREEN_WIDTH//45, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.7, BLACK)
+        bouton_5 = pygame.Surface((SCREEN_WIDTH//12.4, SCREEN_HEIGHT//22), pygame.SRCALPHA)
+        bouton_5.fill(TRANSPARENT if not bouton_5_survole else BROWN)
+        screen.blit(bouton_5, ((SCREEN_WIDTH*(0.92), SCREEN_HEIGHT*(0.001))))
+        draw_text("Quitter", 30, SCREEN_WIDTH*0.96, -5, BLACK)
 
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-            if event.type == pygame.MOUSEMOTION:
+            if event.type == pygame.MOUSEMOTION: 
                 mx, my = pygame.mouse.get_pos()
-                bouton_quitter.hovered = bouton_quitter.est_survol(mx, my)
-
+                bouton_5_survole = bouton_5.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_quitter.est_survol(mx, my):
+                if bouton_5.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+                    running = False 
+        
+        # Affichage des règles
+        draw_text("Les Monstres", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.3, BLACK)
+        draw_text("Les Trappes", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.4, BLACK)
+        draw_text("Le Shop", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.5, BLACK)
+        draw_text("Le Boss Final", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.6, BLACK)
+        draw_text("Gagner le Jeu", 24, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT * 0.7, BLACK)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_5.get_rect(center=(SCREEN_WIDTH * 0.965, SCREEN_HEIGHT * 0.015)).collidepoint((mx, my)):
                     running = False
+                elif SCREEN_WIDTH * 0.5 - 100 < mx < SCREEN_WIDTH * 0.5 + 100:
+                    if SCREEN_HEIGHT * 0.3 - 20 < my < SCREEN_HEIGHT * 0.3 + 20:
+                        afficher_detail_regles("Les Monstres")
+                    elif SCREEN_HEIGHT * 0.4 - 20 < my < SCREEN_HEIGHT * 0.4 + 20:
+                        afficher_detail_regles("Les Trappes")
+                    elif SCREEN_HEIGHT * 0.5 - 20 < my < SCREEN_HEIGHT * 0.5 + 20:
+                        afficher_detail_regles("Le Shop")
+                    elif SCREEN_HEIGHT * 0.6 - 20 < my < SCREEN_HEIGHT * 0.6 + 20:
+                        afficher_detail_regles("Le Boss Final")
+                    elif SCREEN_HEIGHT * 0.7 - 20 < my < SCREEN_HEIGHT * 0.7 + 20:
+                        afficher_detail_regles("Gagner le Jeu")
+    
+        pygame.display.update()
+        
+        
+def afficher_detail_regles(titre):
+    fond_image = pygame.image.load('img/map/desert.png').convert()  
+    fond_image = pygame.transform.scale(fond_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    
+    running = True
+    while running:
+        screen.blit(fond_image, (0, 0))
+        
+        
+        # Dessiner le fond blanc transparent
+        fond_surface = pygame.Surface((SCREEN_WIDTH * 0.9, SCREEN_HEIGHT * 0.64), pygame.SRCALPHA)
+        fond_surface.fill((255, 255, 255, 140))  
+        
+        screen.blit(fond_surface, (SCREEN_WIDTH * 0.05, SCREEN_HEIGHT * 0.18))
 
-        bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
+        draw_text(titre, 40, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.1, BLACK)
 
-        bouton_quitter.dessiner(screen)
+        
+        if titre == "Les Monstres":
+            # Régle 1
+            draw_text("- Chaque joueur commence avec un niveau de santé et une force déterminés aléatoirement.\n\n"
+                      "- Lorsqu'un joueur rencontre un monstre, un combat est déclenché.\n\n"
+                      "- Pour combattre un monstre, le joueur lance un dé pour déterminer l'issue du combat. \n"
+                      "La force du joueur et celle du monstre seront prises en compte pour déterminer le résultat.\n\n"
+                      "- Si le joueur gagne, il récupère une récompense, telle que de l'argent ou des points de vie supplémentaires.\n\n"
+                      "- Si le joueur perd, il subit des dégâts en fonction de la force du monstre \n et peut être contraint de reculer sur le plateau.",
+                      22, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT // 4, BLACK)
+        elif titre == "Les Trappes":
+            # Régle 2
+            draw_text("- Le plateau est parsemé de trappes. Lorsqu'un joueur tombe sur une trappe, \n il subit un effet aléatoire, pouvant être bénéfique ou néfaste.\n\n\n\n"
+                     "- Les effets peuvent inclure la perte d'argent, la perte de points de vie, \n des déplacements aléatoires sur le plateau, ou même des rencontres avec des monstres supplémentaires.",
+                     22, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT // 3, BLACK)
+        elif titre == "Le Shop":
+            # Régle 3
+            draw_text("- Le Shop est un endroit où les joueurs peuvent dépenser leur argent durement gagné.\n\n"
+                     "- Les items disponibles à l'achat peuvent inclure des potions de soin, \n des armes améliorées, des armures renforcées, ou des objets spéciaux offrant des avantages temporaires.\n\n\n"
+                     "- Les prix des articles varient en fonction de leur utilité et de leur rareté.", 
+                     22, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT // 3, BLACK)
+        elif titre == "Le Boss Final":
+            # Régle 4
+            draw_text("   - Une fois que les joueurs ont traversé le labyrinthe, combattu divers monstres et rassemblé des ressources, \n ils atteignent enfin le Boss Final.\n\n"
+                      " - Le Boss Final est un ennemi redoutable avec une santé et une force considérablement \n supérieures à celles des autres monstres.\n\n"
+                      " - Pour vaincre le Boss Final, les joueurs doivent unir leurs forces et utiliser leurs compétences \n et leurs ressources au maximum.\n\n"
+                      " - Le combat contre le Boss Final est une bataille épique, et la victoire apporte la gloire \n et la reconnaissance éternelle aux joueurs.", 
+                      22, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT // 3, BLACK)
+        elif titre == "Gagner le Jeu":
+            # Régle 5
+            draw_text("- Le jeu se termine lorsque le Boss Final est vaincu.\n\n\n\n"
+                      " - Le joueur ou l'équipe de joueurs ayant vaincu le Boss Final est déclaré vainqueur du jeu.", 
+                      22, SCREEN_WIDTH * 0.5, SCREEN_HEIGHT // 3, BLACK)
+        
+        bouton_quitter = pygame.Rect(SCREEN_WIDTH * 0.8, SCREEN_HEIGHT * 0.85, 200, 55)
+        pygame.draw.rect(screen, BROWN, bouton_quitter)
 
-        pygame.display.flip()
-        pygame.time.Clock().tick(FPS)
+        texte_x = bouton_quitter.centerx - 1  
+        texte_y = bouton_quitter.centery - 12  
+
+        draw_text("Fermer", 25, texte_x, texte_y, BLACK)
+
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if bouton_quitter.collidepoint(event.pos):
+                    running = False
+        
+        pygame.display.update()
 
 def credit() : 
 
@@ -715,10 +921,11 @@ def credit() :
         screen.blit(fond_image, (0, 0))
         mx, my = pygame.mouse.get_pos()
 
-        draw_text("Creator :", SCREEN_WIDTH//12, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.09, BLACK)
-        draw_text("Nathan Rousselle", SCREEN_WIDTH//20, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.35, BLACK)
-        draw_text("With the help of :", SCREEN_WIDTH//16, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.55, BLACK)
-        draw_text("Lionnel Conoir", SCREEN_WIDTH//20, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.75, BLACK)
+        draw_text("Creator :", SCREEN_WIDTH//18, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.09, BLACK)
+        draw_text("Nathan Rousselle", SCREEN_WIDTH//20, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.30, BLACK)
+        draw_text("With the help of :", SCREEN_WIDTH//18, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.55, BLACK)
+        draw_text("Lionnel Conoir, Canva Baptiste", SCREEN_WIDTH//26, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.75, BLACK)
+        draw_text("Dumilly Baptiste, Fournier Victor", SCREEN_WIDTH//26, SCREEN_WIDTH//2, SCREEN_HEIGHT*0.85, BLACK)
 
         for event in pygame.event.get():
 

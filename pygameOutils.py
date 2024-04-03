@@ -6,7 +6,6 @@ from plateau import *
 from labyrinthe import *
 from bouton import *
 
-
 # Initialisation de Pygame
 pygame.init()
 
@@ -123,10 +122,15 @@ class BarreVie:
 # Fonctions pour afficher le texte
 def draw_text(text, size, x, y, color):
     font = pygame.font.Font(font_path, size)
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    screen.blit(text_surface, text_rect)
+    lines = text.split('\n') 
+
+    y_offset = 0
+    for line in lines:
+        text_surface = font.render(line, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y + y_offset) 
+        screen.blit(text_surface, text_rect)
+        y_offset += text_rect.height
 
 
 def background(choice):
