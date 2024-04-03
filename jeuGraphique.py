@@ -153,6 +153,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
 
         afficherJoueursLaby(joueurs_choix)
 
+        cercle_joueur = Cercle(RED, joueurs_choix[compteur_lancers].position[0] * (SCREEN_HEIGHT//13.8) + (SCREEN_WIDTH // 3.35), joueurs_choix[compteur_lancers].position[1] * (SCREEN_HEIGHT//13.8) + (SCREEN_HEIGHT // 8.8), 20, 3)
+
         # Affichage du menu stats / objet d'un joueur
 
         fond_player = pygame.Surface((SCREEN_WIDTH//4.3, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -464,6 +466,8 @@ def affichageGraphique(choix, graphe, joueurs_choix) :
                 statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
                 sys.exit()
 
+        cercle_joueur.draw()
+
         bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
 
         bouton_quitter.dessiner(screen)
@@ -495,5 +499,7 @@ if __name__ == "__main__":
     graphe = None
     joueurs_choix = []
     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
-    # joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
+    joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))
+    joueurs_choix.append(Joueur("Berserk", graphe, (5,10), 120, 120, 20, 10, 15, 3, 100, "img/classe/Berserk.png"))  
+    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Mage.png"))              
     affichageGraphique(choix, graphe, joueurs_choix) 

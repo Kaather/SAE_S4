@@ -73,6 +73,25 @@ class Point:
     def draw(self, color, radius, offset_x=0, offset_y=0):
         pygame.draw.circle(screen, color, (self.x + offset_x, self.y + offset_y), radius)
 
+class Cercle:
+    """Classe qui représente un cercle"""
+
+    def __init__(self, color, x, y, radius, thickness=0):
+        """
+        Initialise un cercle.
+        """
+        self.color = color
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.thickness = thickness
+
+    def draw(self):
+        """
+        Dessine le cercle sur l'écran.
+        """
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, self.thickness)
+
 class BarreVie:
     """Classe qui représente une barre de vie dynamique"""
 
@@ -416,6 +435,8 @@ if __name__ == '__main__':
     rectangle2 = Rectangle(BLACK, 200, 200, 5, 20)
     pointRouge = Point(100, 200)
 
+    cercle_rouge = Cercle(RED, 400, 300, 20, 3)
+
     carreOmbre1 = RectangleOmbre(BLACK, 300, 200, 50, 50)
 
     barre_joueur = BarreVie(350, 50, 100, 100)
@@ -438,7 +459,7 @@ if __name__ == '__main__':
         rectangle2.draw()
         pointRouge.draw(RED, 5)
         carreOmbre1.draw()
+        cercle_rouge.draw()
 
-        carreOmbre1.set_explored()
 
         pygame.display.flip()
