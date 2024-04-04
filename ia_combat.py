@@ -3,16 +3,207 @@ from plateau import *
 from pygameOutils import *
 from jeuGraphique import *
 from jeuGraphiqueReseau import *
+from combatMonstre import *
+from pygameOutils import *
+import random
 
 
-def combat_facile():
-    print("aléatoire / Facile")
+def combat_facile(joueurs_choix, compteur_lancers, monstre):
+    if joueurs_choix[compteur_lancers].nom == "Healer" :
 
-    #Générer un nombre aléatoire entre 1 et 6 pour représenter le niveau facile des combats
-    combat = random.randint(1, 6)
-    
-    print("Déplacement aléatoire pour niveau facile:", combat)
+        if joueurs_choix[compteur_lancers].pv < joueurs_choix[compteur_lancers].pv_max :
+            capacite = random.randint(1, 4)
 
+            if capacite == 1 and joueurs_choix[compteur_lancers].potions > 0 :
+                joueurs_choix[compteur_lancers].utiliser_potion()
+            
+            if capacite == 2 :
+                joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                if joueur_selectionne == 1 :
+                    soin(joueurs_choix[0])
+
+                if joueur_selectionne == 2 :
+                    soin(joueurs_choix[1])
+
+                if joueur_selectionne == 3 :
+                    soin(joueurs_choix[2])
+
+                if joueur_selectionne == 4 :
+                    soin(joueurs_choix[3])
+
+            if capacite == 3 :
+                choix_bonus = random.randint(1, 3)
+
+                if choix_bonus == 1 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].attaque = joueurs_choix[0].attaque + 10
+
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].attaque = joueurs_choix[1].attaque + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].attaque = joueurs_choix[2].attaque + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].attaque = joueurs_choix[3].attaque + 10
+
+                if choix_bonus == 2 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].magie = joueurs_choix[0].magie + 10
+                    
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].magie = joueurs_choix[1].magie + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].magie = joueurs_choix[2].magie + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].magie = joueurs_choix[3].magie + 10
+                
+                if choix_bonus == 3 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].vitesse = joueurs_choix[0].vitesse + 10
+
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].vitesse = joueurs_choix[1].vitesse + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].vitesse = joueurs_choix[2].vitesse + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].vitesse = joueurs_choix[3].vitesse + 10
+
+            if capacite == 4 :
+                choix_malus = random.randint(1, 3)
+
+                if choix_malus == 1 :
+                    monstre.attaque = monstre.attaque - 10
+
+                if choix_malus == 2 :
+                    monstre.magie = monstre.magie - 10
+                
+                if choix_malus == 3 :
+                    monstre.vitesse = monstre.vitesse - 10
+
+        else :
+            capacite = random.randint(1, 3)
+
+            if capacite == 1 :
+                joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                if joueur_selectionne == 1 :
+                    soin(joueurs_choix[0])
+
+                if joueur_selectionne == 2 :
+                    soin(joueurs_choix[1])
+
+                if joueur_selectionne == 3 :
+                    soin(joueurs_choix[2])
+
+                if joueur_selectionne == 4 :
+                    soin(joueurs_choix[3])
+
+            if capacite == 2 :
+                choix_bonus = random.randint(1, 3)
+
+                if choix_bonus == 1 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].attaque = joueurs_choix[0].attaque + 10
+
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].attaque = joueurs_choix[1].attaque + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].attaque = joueurs_choix[2].attaque + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].attaque = joueurs_choix[3].attaque + 10
+
+                if choix_bonus == 2 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].magie = joueurs_choix[0].magie + 10
+                    
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].magie = joueurs_choix[1].magie + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].magie = joueurs_choix[2].magie + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].magie = joueurs_choix[3].magie + 10
+                
+                if choix_bonus == 3 :
+                    joueur_selectionne = random.randint(1, len(joueurs_choix))
+
+                    if joueur_selectionne == 1 :
+                        joueurs_choix[0].vitesse = joueurs_choix[0].vitesse + 10
+
+                    if joueur_selectionne == 2 :
+                        joueurs_choix[1].vitesse = joueurs_choix[1].vitesse + 10
+
+                    if joueur_selectionne == 3 :
+                        joueurs_choix[2].vitesse = joueurs_choix[2].vitesse + 10
+
+                    if joueur_selectionne == 4 :
+                        joueurs_choix[3].vitesse = joueurs_choix[3].vitesse + 10
+
+            if capacite == 3 :
+                choix_malus = random.randint(1, 3)
+
+                if choix_malus == 1 :
+                    monstre.attaque = monstre.attaque - 10
+                    if monstre.attaque < 0 :
+                        monstre.attaque = 5
+
+                if choix_malus == 2 :
+                    monstre.magie = monstre.magie - 10
+                    if monstre.magie < 0 :
+                        monstre.magie = 5
+                
+                if choix_malus == 3 :
+                    monstre.vitesse = monstre.vitesse - 10
+                    if monstre.vitesse < 0 :
+                        monstre.vitesse = 5
+
+    else : 
+
+        if joueurs_choix[compteur_lancers].pv < joueurs_choix[compteur_lancers].pv_max :
+            capacite = random.randint(1, 4)
+
+            if capacite == 1 :
+                attaque(joueurs_choix[compteur_lancers], monstre)
+
+            if capacite == 2 :
+                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+
+            if capacite == 3 :
+                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+
+            if capacite == 4 :
+                joueurs_choix[compteur_lancers].utiliser_potion()
+
+        else :
+            capacite = random.randint(1, 3)
+
+            if capacite == 1 :
+                attaque(joueurs_choix[compteur_lancers], monstre)
+
+            if capacite == 2 :
+                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+
+            if capacite == 3 :
+                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
         
 
 def combat_intermediaire():

@@ -8,7 +8,7 @@ from entite import *
 import time
 from bouton import *
 from statistique import *
-from combatMonstre import *
+import combatMonstre
 
 pygame.init()
 
@@ -333,7 +333,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
             
         # Combat final        
         if ouvrir_piege_doree:
-            if combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
+            if combatMonstre.combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
                 ouvrir_piege_doree = False
                 running = False   
                 # calcul du temps de jeu
@@ -345,7 +345,7 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
                 duree = time.time() - start_time
                 running = False
                 
-            if numero == "1" : 
+            if numero == str(len(joueurs_choix)) : 
                 mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nb_tour, choix, int(duree), nb_potion, nb_argent)  
             
             socket.close()
@@ -353,12 +353,12 @@ def affichageGraphiqueReseau(choix, graphe, joueurs_choix, socket, numero) :
             sys.exit()
      
         if joueurs_piegee:
-            if not combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
+            if not combatMonstre.combatMonstreReseau(numero, socket, joueurs_choix, monstre_choisi, compteur_lancers, choix):
                 joueurs_piegee = False
                 partie_finie = False
                 duree = time.time() - start_time
                 running = False
-                if numero == "1" :
+                if numero == str(len(joueurs_choix)) :
                     mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nb_tour, choix, int(duree), nb_potion, nb_argent)
                 socket.close()
                 pygame.quit()

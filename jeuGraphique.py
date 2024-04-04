@@ -153,6 +153,8 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
         mx, my = pygame.mouse.get_pos()
 
         afficherJoueursLaby(joueurs_choix)
+        
+        cercle_joueur = Cercle(RED, joueurs_choix[compteur_lancers].position[0] * (SCREEN_HEIGHT//13.8) + (SCREEN_WIDTH // 3.35), joueurs_choix[compteur_lancers].position[1] * (SCREEN_HEIGHT//13.8) + (SCREEN_HEIGHT // 8.8), 20, 3)
 
         # Affichage du menu stats / objet d'un joueur
 
@@ -183,26 +185,29 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
         # Affichage bouton utiliser potion (seulement si on a pas tout ses points de vie)
         if joueurs_choix[compteur_lancers].pv != joueurs_choix[compteur_lancers].pv_max :
             potion_possible = True
-        
-        if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
-            bouton_shop.hovered = bouton_shop.est_survol(mx, my)
+            
+        if vrai_joueur[compteur_lancers]:
+            if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
+                bouton_shop.hovered = bouton_shop.est_survol(mx, my)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_shop.est_survol(mx, my):
-                    ouvrir_shop = True
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bouton_shop.est_survol(mx, my):
+                        ouvrir_shop = True
 
         # Affichage bouton ouvrir piège dorée (seulement si on a fait les 5 pièges et qu'on est sur la case du piège dorée)
-        if monstre_battu == 5 :
+        if monstre_battu == 5:
             piege_doree_possible = True 
             draw_text("Vous pouvez aller", SCREEN_WIDTH//45, SCREEN_WIDTH*0.11, SCREEN_HEIGHT*0.83, BLACK)
             draw_text("ouvrir le piège dorée !", SCREEN_WIDTH//45, SCREEN_WIDTH*0.115, SCREEN_HEIGHT*0.88, BLACK)
+            
+        if vrai_joueur[compteur_lancers]:
 
-        if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :
-            bouton_piege_doree.hovered = bouton_piege_doree.est_survol(mx, my)
+            if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :
+                bouton_piege_doree.hovered = bouton_piege_doree.est_survol(mx, my)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_piege_doree.est_survol(mx, my):
-                    ouvrir_piege_doree = True
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bouton_piege_doree.est_survol(mx, my):
+                        ouvrir_piege_doree = True
 
         for piege_position in piege_positions:
             x, y = piege_position
@@ -215,20 +220,13 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
         for shop_position in shop_positions :
             x, y = shop_position
             screen.blit(shop_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.49) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 11) - (SCREEN_HEIGHT//36)))
-            screen.blit(piege_doree_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//36)))
-
-        for shop_position in shop_positions :
-            x, y = shop_position
-            screen.blit(shop_image, ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.49) - (SCREEN_HEIGHT//36), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 11) - (SCREEN_HEIGHT//36)))
 
         for potion_position in potion_positions:
             x, y = potion_position
             screen.blit(potion_images[potion_positions.index(potion_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//45), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//45)))
-            screen.blit(potion_images[potion_positions.index(potion_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//45), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//45)))
 
         for argent_position in argent_positions:
             x, y = argent_position
-            screen.blit(argent_images[argent_positions.index(argent_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//45), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//45)))
             screen.blit(argent_images[argent_positions.index(argent_position)], ((x * (SCREEN_HEIGHT//13.8)) + (SCREEN_WIDTH // 3.35) - (SCREEN_HEIGHT//45), (y * (SCREEN_HEIGHT//13.8)) + (SCREEN_HEIGHT // 8.8) - (SCREEN_HEIGHT//45)))
 
         for case in cases_accessibles:
@@ -301,7 +299,12 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
                         joueur.position = case
                     choix_monstre = random.choice(monstre)
                     monstre.remove(choix_monstre)
-                    combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix)
+                    if combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix, difficulte, vrai_joueur) == False:
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        statistique.mise_en_stat(joueurs_choix, monstre_battu, False, nombre_tour, choix, int(duree), nb_potion, nb_argent)
+                        break   
                     joueurs_piegee = False
                     compteur_lancers = 0
                     monstre_battu += 1
@@ -443,7 +446,7 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
                 # Combat final        
                 if ouvrir_piege_doree :
                     choix_boss = random.choice(boss)
-                    if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix):
+                    if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix, difficulte, vrai_joueur):
                         # calcul de la durée total de la partie
                         time_end = time.time()
                         duree = time_end - time_start
@@ -459,6 +462,8 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
                         
                     statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)         
                     sys.exit()
+                    
+            cercle_joueur.draw()
 
             bouton_quitter.bouton_actuelle = bouton_quitter.bouton_survol if bouton_quitter.hovered else bouton_quitter.bouton_normale
 
@@ -480,14 +485,79 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
                 bouton_piege_doree.dessiner(screen)
 
         else:
-            if difficulte == "Facile":
-                deplacement_facile()
+            if difficulte == "Facile" or difficulte == "Moyen" or difficulte == "Difficile":
+                time.sleep(0.5)
+                deplacement_facile(cases_accessibles, joueurs_choix[compteur_lancers])
+                case = joueurs_choix[compteur_lancers].position
                 
+                nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                joueurs_choix[compteur_lancers].position = case
+
+                if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
+                    verifier_piege(case, piege_positions, piege_images)
+                    joueurs_piegee = True
+                    
+                if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
+                    if joueurs_choix[compteur_lancers].argent < 100 :
+                        shopping = False
+                    else :
+                        shopping = True
+                        while shopping :
+                            if joueurs_choix[compteur_lancers].argent >= 100 :
+                                choix_achat = random.randint(1, 4)
+                                if choix_achat == 1 and joueurs_choix[compteur_lancers].argent >= 300 :
+                                    joueurs_choix[compteur_lancers].attaque += 10
+                                    joueurs_choix[compteur_lancers].argent -= 300
+                                elif choix_achat == 2 and joueurs_choix[compteur_lancers].argent >= 300:
+                                    joueurs_choix[compteur_lancers].magie += 10
+                                    joueurs_choix[compteur_lancers].argent -= 300
+                                elif choix_achat == 3 and joueurs_choix[compteur_lancers].argent >= 100:
+                                    joueurs_choix[compteur_lancers].potion += 1
+                                    joueurs_choix[compteur_lancers].argent -= 100
+                                elif choix_achat == 4 and joueurs_choix[compteur_lancers].argent >= 200:
+                                    joueurs_choix[compteur_lancers].vitesse += 10
+                                    joueurs_choix[compteur_lancers].argent -= 200 
+                            else :
+                                shopping = False
+                                
+                if joueurs_piegee == True :
+                    for joueur in joueurs_choix:
+                        joueur.position = case
+                    choix_monstre = random.choice(monstre)
+                    monstre.remove(choix_monstre)
+                    if not combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix, difficulte, vrai_joueur):
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        statistique.mise_en_stat(joueurs_choix, monstre_battu, False, nombre_tour, choix, int(duree), nb_potion, nb_argent)
+                        break
+                    joueurs_piegee = False
+                    compteur_lancers = 0
+                    monstre_battu += 1
                 
+                if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :
+                    choix_boss = random.choice(boss)
+                    if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix, difficulte, vrai_joueur):
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        partie_finie = True
+                        monstre_battu = 6
+                    else:
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        partie_finie = False
+                    statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)
+                    
+                    
+                cases_accessibles = []
                 compteur_lancers += 1
                 if compteur_lancers >= len(joueurs_choix):
-                        compteur_lancers = 0
-                        nombre_tour += 1
+                    compteur_lancers = 0
+                    nombre_tour += 1
+                lancer_fait = False
+                    
                         
                         
         barre_joueur.afficher_barre_vie(screen)
@@ -501,5 +571,5 @@ if __name__ == "__main__":
     graphe = None
     joueurs_choix = []
     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
-    # joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
-    affichageGraphique(choix, graphe, joueurs_choix) 
+    joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
+    affichageGraphique(choix, graphe, joueurs_choix, "Facile", [False, False]) 

@@ -6,10 +6,10 @@ from jeuGraphiqueReseau import *
 import random
 
 
-def deplacement_facile():
-    print("Déplacement aléatoire / Facile")
-    deplacement = random.randint(1, 6)
-    print("Nombre de cases à avancer :", deplacement)
+def deplacement_facile(case_accessible, joueur):
+    case = random.randint(0, len(case_accessible) -1)
+    
+    joueur.position = case_accessible[case]
         
 
 

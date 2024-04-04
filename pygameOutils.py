@@ -424,10 +424,16 @@ def appliquer_bonus(joueur, bonus) :
 def appliquer_malus(monstre, malus) :
     if malus == "Attaque" :
         monstre.attaque = monstre.attaque - 10
+        if monstre.attaque < 0 :
+            monstre.attaque = 5
     elif malus == "Magie":
         monstre.magie = monstre.magie - 10
+        if monstre.magie < 0 :
+            monstre.magie = 5
     elif malus == "Vitesse":
         monstre.vitesse = monstre.vitesse - 10
+        if monstre.vitesse < 0 :
+            monstre.vitesse = 5
 
 if __name__ == '__main__':
 

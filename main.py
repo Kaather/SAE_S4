@@ -377,20 +377,14 @@ def choix_difficulte():
                 if bouton_facile.est_survol(mx, my):
                     difficulte = "Facile"
                     running = False
-                    deplacement_facile()
-                    combat_facile()
 
                 if bouton_moyen.est_survol(mx, my):
                     difficulte = "Moyen"
                     running = False
-                    deplacement_intermediaire()
-                    combat_intermediaire()
 
                 if bouton_difficile.est_survol(mx, my):
                     difficulte = "Difficile"
                     running = False
-                    deplacement_difficile()
-                    combat_difficile()
 
         bouton_facile.bouton_actuelle = bouton_facile.bouton_survol if bouton_facile.hovered else bouton_facile.bouton_normale
         bouton_moyen.bouton_actuelle = bouton_moyen.bouton_survol if bouton_moyen.hovered else bouton_moyen.bouton_normale

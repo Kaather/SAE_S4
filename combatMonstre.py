@@ -5,11 +5,12 @@ from pygameOutils import *
 from labyrinthe import *
 from entite import *
 from bouton import *
+from ia_combat import *
 
 clock = pygame.time.Clock()
 FPS = 60
 
-def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
+def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix, difficulte, vrai_joueur):
     valeur_avant_combat = []
     # stock les valeurs d'attaques, de magie et de vitesse de chaque joueur avant le combat
     for joueur in joueurs_choix:
@@ -173,416 +174,434 @@ def combatMonstre(joueurs_choix, monstre, compteur_lancers, choix):
             screen.blit(bouton_potion, ((SCREEN_WIDTH*0.76), SCREEN_HEIGHT*0.155))
             draw_text("Boire potion", SCREEN_WIDTH//35, SCREEN_WIDTH*0.88, SCREEN_HEIGHT*0.155, BLACK)
             potion_possible = True
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
             
-            if potion_possible == True :
+        if vrai_joueur[compteur_lancers]:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                
+                if potion_possible == True :
+
+                    if event.type == pygame.MOUSEMOTION: 
+                        mx, my = pygame.mouse.get_pos()
+                        bouton_potion_survole = bouton_potion.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185))).collidepoint((mx, my))
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if bouton_potion.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185)).collidepoint((mx, my)):
+                            joueurs_choix[compteur_lancers].utiliser_potion()
+                            compteur_lancers += 1                                 
+                            potion_possible = False
+                            
 
                 if event.type == pygame.MOUSEMOTION: 
                     mx, my = pygame.mouse.get_pos()
-                    bouton_potion_survole = bouton_potion.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185))).collidepoint((mx, my))
+                    bouton_attaque_survole = bouton_attaque.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385))).collidepoint((mx, my))
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if bouton_potion.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.185)).collidepoint((mx, my)):
-                        joueurs_choix[compteur_lancers].utiliser_potion()
-                        compteur_lancers += 1                                 
-                        potion_possible = False
-                        
+                    if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)):
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            # Met un filtre blanc flou
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
 
-            if event.type == pygame.MOUSEMOTION: 
-                mx, my = pygame.mouse.get_pos()
-                bouton_attaque_survole = bouton_attaque.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385))).collidepoint((mx, my))
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_attaque.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.385)).collidepoint((mx, my)):
-                    if joueurs_choix[compteur_lancers].nom == 'Healer':
-                        # Met un filtre blanc flou
-                        fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                        fond_chargement.fill(WHITE_TR)
-                        screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-
-                        
-                        # Calcul des positions initiales
-                        bouton_width = SCREEN_WIDTH * 0.20
-                        bouton_height = SCREEN_HEIGHT * 0.07
-                        bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
-                        bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
-                        bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
-
-                        # Calcul de la largeur totale des boutons
-                        total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
-
-                        # Calcul de la position de départ horizontale
-                        bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
-
-                        # Affichage des boutons
-                        for i in range(len(joueurs_choix)):
-                            bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
-                            bouton_joueur.fill(GREY_TR)
-                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                            screen.blit(bouton_joueur, (bouton_x, bouton_y))
-                            draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
                             
-                            # affiche l'image du joueur au dessus du bouton
-                            joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
-                            joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
-                            screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
-                            
-                            
-                        # Attente de la sélection du joueur
-                        soinFait = True
-                        while soinFait:
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    mx, my = pygame.mouse.get_pos()
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons
+                            for i in range(len(joueurs_choix)):
+                                bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_joueur.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_joueur, (bouton_x, bouton_y))
+                                draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+                                
+                                # affiche l'image du joueur au dessus du bouton
+                                joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
+                                joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
+                                screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
+                                
+                                
+                            # Attente de la sélection du joueur
+                            soinFait = True
+                            while soinFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(joueurs_choix)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                soin(joueurs_choix[i])
+                                                compteur_lancers += 1
+                                                soinFait = False
+                                                
                                     for i in range(len(joueurs_choix)):
                                         bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
                                         bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-                                        if bouton_rect.collidepoint((mx, my)):
-                                            soin(joueurs_choix[i])
-                                            compteur_lancers += 1
-                                            soinFait = False
-                                            
-                                for i in range(len(joueurs_choix)):
-                                    bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                    bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
 
-                                    # Vérifier si la souris survole le bouton
-                                    if bouton_rect.collidepoint(pygame.mouse.get_pos()):
-                                        pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
-                                    else:
-                                        pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
 
-                                    draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
-                                    draw_text("Choisissez un joueur à soigner", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
-                                
-
-                            pygame.display.update()
-                            clock.tick(FPS)                         
-                    
+                                        draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un joueur à soigner", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
                                     
-                    else:
-                        combat(1, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
 
-                            else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
-                                if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
-
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
-
-                            else :
-                                attaque(joueurs_choix[compteur_lancers], monstre)
+                                pygame.display.update()
+                                clock.tick(FPS)                         
+                        
+                                        
+                        else:
+                            combat(1, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
                                 if monstre.pv <= 0 :
                                     monstre_mort = True
 
-                        if joueur_mort :
-                            mort()
-                            return False
-                        
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image)
-                                return True
-                            else:
-                                compteur_lancers += 1
-                                en_combat = False
-
-                        else :
-                            compteur_lancers += 1
-                            
-                        
-            # attaque puissante
-            if event.type == pygame.MOUSEMOTION:
-                mx, my = pygame.mouse.get_pos()
-                bouton_attaque_puissante_survole = bouton_attaque_puissante.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585))).collidepoint((mx, my))
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_attaque_puissante.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585)).collidepoint((mx, my)):
-                    if joueurs_choix[compteur_lancers].nom == 'Healer':
-                        fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                        fond_chargement.fill(WHITE_TR)
-                        screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-                        bonus_options = ['Attaque', 'Vitesse', 'Magie']
-
-                        # Calcul des positions initiales
-                        bouton_width = SCREEN_WIDTH * 0.20
-                        bouton_height = SCREEN_HEIGHT * 0.07
-                        bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
-                        bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
-                        bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
-
-                        # Calcul de la largeur totale des boutons
-                        total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
-
-                        # Calcul de la position de départ horizontale
-                        bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
-
-                        # Affichage des boutons pour les choix de bonus
-                        for i, option in enumerate(bonus_options):
-                            bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
-                            bouton_bonus.fill(GREY_TR)
-                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                            screen.blit(bouton_bonus, (bouton_x, bouton_y))
-                            draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
-
-                        # Attente de la sélection du bonus
-                        choixBonusFait = False
-                        while not choixBonusFait:
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    mx, my = pygame.mouse.get_pos()
-                                    for i in range(len(bonus_options)):
-                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-                                        if bouton_rect.collidepoint((mx, my)):
-                                            bonus = bonus_options[i]
-                                            choixBonusFait = True
-
-                                for i in range(len(bonus_options)):
-                                    bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                    bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-
-                                    # Vérifier si la souris survole le bouton
-                                    if bouton_rect.collidepoint(pygame.mouse.get_pos()):
-                                        pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
-                                    else:
-                                        pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
-
-                                    draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
-                                    draw_text("Choisissez un bonus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
-
-                            pygame.display.update()
-                            clock.tick(FPS) 
-                        
-                        # Choisir le joueurs à booster
-                        # Met un filtre blanc flou
-                        fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                        fond_chargement.fill(WHITE_TR)
-                        screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-
-                        
-                        # Calcul des positions initiales
-                        bouton_width = SCREEN_WIDTH * 0.20
-                        bouton_height = SCREEN_HEIGHT * 0.07
-                        bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
-                        bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
-                        bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
-
-                        # Calcul de la largeur totale des boutons
-                        total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
-
-                        # Calcul de la position de départ horizontale
-                        bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
-
-                        # Affichage des boutons
-                        for i in range(len(joueurs_choix)):
-                            bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
-                            bouton_joueur.fill(GREY_TR)
-                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                            screen.blit(bouton_joueur, (bouton_x, bouton_y))
-                            draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
-                            
-                            # affiche l'image du joueur au dessus du bouton
-                            joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
-                            joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
-                            screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
-                            
-                            
-                        # Attente de la sélection du joueur
-                        joueurChoisi = True
-                        while joueurChoisi:
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    mx, my = pygame.mouse.get_pos()
-                                    for i in range(len(joueurs_choix)):
-                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-                                        if bouton_rect.collidepoint((mx, my)):
-                                            appliquer_bonus(joueurs_choix[i], bonus)
-                                            compteur_lancers += 1
-                                            joueurChoisi = False
-                                            
-                                for i in range(len(joueurs_choix)):
-                                    bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                    bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-
-                                    # Vérifier si la souris survole le bouton
-                                    if bouton_rect.collidepoint(pygame.mouse.get_pos()):
-                                        pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
-                                    else:
-                                        pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
-
-                                    draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
-                                    draw_text("Choisissez un joueur à booster", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)  
-                                    
-                            pygame.display.update()
-                            clock.tick(FPS)              
-                            
-                    else:
-                        combat(2, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
 
                             else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
                                 if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
+                                        joueur_mort = True
 
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
+                                else :
+                                    attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+
+                            if joueur_mort :
+                                mort()
+                                return False
+                            
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image)
+                                    return True
+                                else:
+                                    compteur_lancers += 1
+                                    en_combat = False
 
                             else :
-                                attaque_puissante(joueurs_choix[compteur_lancers], monstre)
-                                if monstre.pv <= 0 :
-                                    monstre_mort = True
-
-                        if joueur_mort :
-                            return False
-                                
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image)
-                                return True
-                            else:
                                 compteur_lancers += 1
-                                en_combat = False
+                                
                             
-                        else :
-                            compteur_lancers += 1            
-                        
-            # attaque magique
-            if event.type == pygame.MOUSEMOTION:
-                mx, my = pygame.mouse.get_pos()
-                bouton_attaque_magique_survole = bouton_attaque_magique.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785))).collidepoint((mx, my))
+                # attaque puissante
+                if event.type == pygame.MOUSEMOTION:
+                    mx, my = pygame.mouse.get_pos()
+                    bouton_attaque_puissante_survole = bouton_attaque_puissante.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585))).collidepoint((mx, my))
                 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_attaque_magique.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785)).collidepoint((mx, my)):
-                    if joueurs_choix[compteur_lancers].nom == 'Healer':
-                        fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
-                        fond_chargement.fill(WHITE_TR)
-                        screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
-                        bonus_options = ['Attaque', 'Vitesse', 'Magie']
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bouton_attaque_puissante.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.585)).collidepoint((mx, my)):
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+                            bonus_options = ['Attaque', 'Vitesse', 'Magie']
 
-                        # Calcul des positions initiales
-                        bouton_width = SCREEN_WIDTH * 0.20
-                        bouton_height = SCREEN_HEIGHT * 0.07
-                        bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
-                        bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
-                        bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
 
-                        # Calcul de la largeur totale des boutons
-                        total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
 
-                        # Calcul de la position de départ horizontale
-                        bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
 
-                        # Affichage des boutons pour les choix de bonus
-                        for i, option in enumerate(bonus_options):
-                            bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
-                            bouton_bonus.fill(GREY_TR)
-                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                            screen.blit(bouton_bonus, (bouton_x, bouton_y))
-                            draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+                            # Affichage des boutons pour les choix de bonus
+                            for i, option in enumerate(bonus_options):
+                                bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_bonus.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_bonus, (bouton_x, bouton_y))
+                                draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
 
-                        # Attente de la sélection du bonus
-                        choixBonusFait = False
-                        while not choixBonusFait:
-                            for event in pygame.event.get():
-                                if event.type == pygame.QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    mx, my = pygame.mouse.get_pos()
+                            # Attente de la sélection du bonus
+                            choixBonusFait = False
+                            while not choixBonusFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(bonus_options)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                bonus = bonus_options[i]
+                                                choixBonusFait = True
+
                                     for i in range(len(bonus_options)):
                                         bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
                                         bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
-                                        if bouton_rect.collidepoint((mx, my)):
-                                            appliquer_malus(monstre, bonus_options[i])
-                                            choixBonusFait = True
-                                            compteur_lancers += 1
 
-                                for i in range(len(bonus_options)):
-                                    bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
-                                    bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
 
-                                    # Vérifier si la souris survole le bouton
-                                    if bouton_rect.collidepoint(pygame.mouse.get_pos()):
-                                        pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
-                                    else:
-                                        pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+                                        draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un bonus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
 
-                                    draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
-                                    draw_text("Choisissez un malus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
+                                pygame.display.update()
+                                clock.tick(FPS) 
+                            
+                            # Choisir le joueurs à booster
+                            # Met un filtre blanc flou
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
 
-                            pygame.display.update()
-                            clock.tick(FPS) 
-                        
-                    else:
-                        combat(3, joueurs_choix[compteur_lancers], monstre)
-                        if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
-                            if monstre.pv <= 0 :
-                                monstre_mort = True
+                            
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
 
-                            else :
-                                monstre_attaque(joueurs_choix[compteur_lancers], monstre)
-                                if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(joueurs_choix) * (bouton_width + bouton_spacing) - bouton_spacing
 
-                        else :
-                            if joueurs_choix[compteur_lancers].pv <= 0 :
-                                    joueur_mort = True
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
 
-                            else :
-                                attaque_magique(joueurs_choix[compteur_lancers], monstre)
+                            # Affichage des boutons
+                            for i in range(len(joueurs_choix)):
+                                bouton_joueur = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_joueur.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_joueur, (bouton_x, bouton_y))
+                                draw_text(f"Joueur {i+1}", SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+                                
+                                # affiche l'image du joueur au dessus du bouton
+                                joueur_image = pygame.image.load(joueurs_choix[i].image).convert_alpha()
+                                joueur_image = pygame.transform.scale(joueur_image, (SCREEN_WIDTH//10, SCREEN_WIDTH//10))
+                                screen.blit(joueur_image, (bouton_x + bouton_spacing, bouton_y - SCREEN_HEIGHT*0.2))
+                                
+                                
+                            # Attente de la sélection du joueur
+                            joueurChoisi = True
+                            while joueurChoisi:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(joueurs_choix)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                appliquer_bonus(joueurs_choix[i], bonus)
+                                                compteur_lancers += 1
+                                                joueurChoisi = False
+                                                
+                                    for i in range(len(joueurs_choix)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+
+                                        draw_text(f"Joueur {i+1}", SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un joueur à booster", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)  
+                                        
+                                pygame.display.update()
+                                clock.tick(FPS)              
+                                
+                        else:
+                            combat(2, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
                                 if monstre.pv <= 0 :
                                     monstre_mort = True
 
-                        if joueur_mort :
-                            mort()
-                            return False
-                                
-                        elif monstre_mort :
-                            if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
-                                gagne(fond_image)
-                                return True
-                            else:
-                                compteur_lancers += 1
-                                en_combat = False
-                                
-                            
-                        else :
-                            compteur_lancers += 1           
-            
-            
-            if event.type == pygame.MOUSEMOTION: 
-                mx, my = pygame.mouse.get_pos()
-                bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
-                    joueurs_choix.clear()   
-                    supprimer_classes()                   
-                    en_combat = False
+                            else :
+                                if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+
+                                else :
+                                    attaque_puissante(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+
+                            if joueur_mort :
+                                return False
+                                    
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image)
+                                    return True
+                                else:
+                                    compteur_lancers += 1
+                                    en_combat = False
+                                
+                            else :
+                                compteur_lancers += 1            
+                            
+                # attaque magique
+                if event.type == pygame.MOUSEMOTION:
+                    mx, my = pygame.mouse.get_pos()
+                    bouton_attaque_magique_survole = bouton_attaque_magique.get_rect(center=((SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785))).collidepoint((mx, my))
+                    
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bouton_attaque_magique.get_rect(center=(SCREEN_WIDTH*0.89, SCREEN_HEIGHT*0.785)).collidepoint((mx, my)):
+                        if joueurs_choix[compteur_lancers].nom == 'Healer':
+                            fond_chargement = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT*0.61), pygame.SRCALPHA)
+                            fond_chargement.fill(WHITE_TR)
+                            screen.blit(fond_chargement, ((0), SCREEN_HEIGHT*0.2))
+                            bonus_options = ['Attaque', 'Vitesse', 'Magie']
+
+                            # Calcul des positions initiales
+                            bouton_width = SCREEN_WIDTH * 0.20
+                            bouton_height = SCREEN_HEIGHT * 0.07
+                            bouton_spacing = bouton_width * 0.25 # Espace entre les boutons
+                            bouton_start_x = (SCREEN_WIDTH - (len(joueurs_choix) * bouton_spacing)) // 2
+                            bouton_y = (SCREEN_HEIGHT - bouton_height) / 2
+
+                            # Calcul de la largeur totale des boutons
+                            total_button_width = len(bonus_options) * (bouton_width + bouton_spacing) - bouton_spacing
+
+                            # Calcul de la position de départ horizontale
+                            bouton_start_x = (SCREEN_WIDTH - total_button_width) // 2
+
+                            # Affichage des boutons pour les choix de bonus
+                            for i, option in enumerate(bonus_options):
+                                bouton_bonus = pygame.Surface((bouton_width, bouton_height), pygame.SRCALPHA)
+                                bouton_bonus.fill(GREY_TR)
+                                bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                screen.blit(bouton_bonus, (bouton_x, bouton_y))
+                                draw_text(option, SCREEN_WIDTH//35, bouton_x + bouton_width // 2, bouton_y, BLACK)
+
+                            # Attente de la sélection du bonus
+                            choixBonusFait = False
+                            while not choixBonusFait:
+                                for event in pygame.event.get():
+                                    if event.type == pygame.QUIT:
+                                        pygame.quit()
+                                        sys.exit()
+                                    if event.type == pygame.MOUSEBUTTONDOWN:
+                                        mx, my = pygame.mouse.get_pos()
+                                        for i in range(len(bonus_options)):
+                                            bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                            bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+                                            if bouton_rect.collidepoint((mx, my)):
+                                                appliquer_malus(monstre, bonus_options[i])
+                                                choixBonusFait = True
+                                                compteur_lancers += 1
+
+                                    for i in range(len(bonus_options)):
+                                        bouton_x = bouton_start_x + i * (bouton_width + bouton_spacing)
+                                        bouton_rect = pygame.Rect(bouton_x, bouton_y, bouton_width, bouton_height)
+
+                                        # Vérifier si la souris survole le bouton
+                                        if bouton_rect.collidepoint(pygame.mouse.get_pos()):
+                                            pygame.draw.rect(screen, (200, 200, 200), bouton_rect)  # Changer la couleur du bouton en hover
+                                        else:
+                                            pygame.draw.rect(screen, (150, 150, 150), bouton_rect)  # Couleur par défaut
+
+                                        draw_text(bonus_options[i], SCREEN_WIDTH // 35, bouton_x + bouton_width // 2, bouton_y, BLACK)  
+                                        draw_text("Choisissez un malus à appliquer", SCREEN_WIDTH // 35, SCREEN_WIDTH // 2, SCREEN_HEIGHT * 0.7, BLACK)                                 
+
+                                pygame.display.update()
+                                clock.tick(FPS) 
+                            
+                        else:
+                            combat(3, joueurs_choix[compteur_lancers], monstre)
+                            if comparaison_vitesse(joueurs_choix[compteur_lancers], monstre) :
+                                if monstre.pv <= 0 :
+                                    monstre_mort = True
+
+                                else :
+                                    monstre_attaque(joueurs_choix[compteur_lancers], monstre)
+                                    if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+
+                            else :
+                                if joueurs_choix[compteur_lancers].pv <= 0 :
+                                        joueur_mort = True
+
+                                else :
+                                    attaque_magique(joueurs_choix[compteur_lancers], monstre)
+                                    if monstre.pv <= 0 :
+                                        monstre_mort = True
+
+                            if joueur_mort :
+                                mort()
+                                return False
+                                    
+                            elif monstre_mort :
+                                if monstre.nom == "Dragon" or monstre.nom == "Aguni" or monstre.nom == "Mort" or monstre.nom == "Gergoth" or monstre.nom == "Ange Déchu":
+                                    gagne(fond_image)
+                                    return True
+                                else:
+                                    compteur_lancers += 1
+                                    en_combat = False
+                                    
+                                
+                            else :
+                                compteur_lancers += 1           
+                
+                
+                if event.type == pygame.MOUSEMOTION: 
+                    mx, my = pygame.mouse.get_pos()
+                    bouton_quitter_survole = bouton_quitter.get_rect(center=((SCREEN_WIDTH*0.965), SCREEN_HEIGHT*(0.015))).collidepoint((mx, my))
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if bouton_quitter.get_rect(center=(SCREEN_WIDTH*0.965, SCREEN_HEIGHT*0.015)).collidepoint((mx, my)):
+                        joueurs_choix.clear()   
+                        supprimer_classes()                   
+                        en_combat = False
+        
+        else:
+            time.sleep(2)
+            if difficulte == "Facile" or difficulte == "Moyen" or difficulte == "Difficile":
+                combat_facile(joueurs_choix, compteur_lancers, monstre) 
+                                
+                if joueurs_choix[compteur_lancers].pv <= 0 :
+                    return False
+                
+                if monstre.pv <= 0 :
+                    return True
+                
+                  
+                compteur_lancers += 1  
+                
+                       
 
         pygame.display.update()
         clock.tick(FPS)
@@ -1426,9 +1445,9 @@ if __name__ == "__main__":
     running = True
     joueurs_choix = []
     graphe = None
-    joueurs_choix.append(Joueur("Healer", graphe, (5,10), 80, 80, 5, 30, 8, 5, 100, "img/classe/Healer.png"))
-    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 50, 20, 5, 30, 8, 5, 100, "img/classe/Paladin.png"))
-    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 50, 20, 5, 30, 8, 5, 100, "img/classe/Mage.png"))
+    joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 50, 20, 5, 30, 8, 0, 100, "img/classe/Paladin.png"))
+    joueurs_choix.append(Joueur("Mage", graphe, (5,10), 50, 20, 5, 30, 8, 0, 100, "img/classe/Mage.png"))
+    joueurs_choix.append(Joueur("Healer", graphe, (5,10), 50, 50, 5, 30, 8, 0, 100, "img/classe/Healer.png"))
     monstre1 = Monstre("loup", 50, 50, 10, 5, 15, "img/ennemi/loup.png")
     boss = []
     boss.append(Monstre("Dragon", 100, 100, 20, 10, 12, "img/ennemi/dragon.png"))
@@ -1438,7 +1457,7 @@ if __name__ == "__main__":
     boss.append(Monstre("Ange Déchu", 100, 100, 20, 10, 12, "img/ennemi/angeDechu.png"))
 
     while running :
-        combatMonstre(joueurs_choix, monstre1, 0, 2)
+        combatMonstre(joueurs_choix, monstre1, 0, 1, "Facile", [False, True, False])
         running = False
         pygame.quit()
         sys.exit()
