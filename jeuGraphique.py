@@ -486,7 +486,7 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
 
         else:
             if difficulte == "Facile" or difficulte == "Moyen" or difficulte == "Difficile":
-                time.sleep(0.5)
+                time.sleep(1)
                 deplacement_facile(cases_accessibles, joueurs_choix[compteur_lancers])
                 case = joueurs_choix[compteur_lancers].position
                 
