@@ -13,21 +13,20 @@ def deplacement_facile(case_accessible, joueur):
         
 
 def deplacement_intermediaire(case_accessible, joueur):
-    directions = [(0, 1), (-1, 0), (0, -1), (1, 0)]  # Droite, Haut, Gauche, Bas
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Droite, Bas, Gauche, Haut
     x, y = joueur.position
 
     # Si c'est la première fois, initialiser le chemin parcouru
     if not hasattr(joueur, 'parcours'):
         joueur.parcours = []
 
-    # Recherche de la direction de la main droite
-    index_direction = directions.index((1, 0))
+    # Trouver la direction de la main droite
+    index_direction = directions.index((0, 1))
 
-    # Parcourir les directions dans le sens des aiguilles d'une montre
+    # Vérifier les directions dans le sens des aiguilles d'une montre
     for _ in range(4):
         new_x, new_y = x + directions[index_direction][0], y + directions[index_direction][1]
-        # Vérifier si la prochaine case dans la direction de la main droite est accessible et non visitée
-        if (new_x, new_y) in case_accessible and (new_x, new_y) not in joueur.parcours:
+        if (new_x, new_y) in case_accessible and (new_x, new_y) not in joueur.parcours[:-1]:
             joueur.position = (new_x, new_y)
             joueur.parcours.append((new_x, new_y))
             return
@@ -35,9 +34,8 @@ def deplacement_intermediaire(case_accessible, joueur):
         index_direction = (index_direction + 1) % 4
 
     # Si aucune direction n'est disponible, faire demi-tour
-    if (x, y) in joueur.parcours:
-        joueur.parcours.remove((x, y))  # Retirer la position actuelle du chemin parcouru pour éviter de boucler
-    joueur.position = (x - directions[index_direction][0], y - directions[index_direction][1])
+    joueur.position = joueur.parcours[-2]
+    joueur.parcours.pop()
 
 
 
