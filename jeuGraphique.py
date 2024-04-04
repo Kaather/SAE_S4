@@ -485,9 +485,82 @@ def affichageGraphique(choix, graphe, joueurs_choix, difficulte, vrai_joueur) :
                 bouton_piege_doree.dessiner(screen)
 
         else:
-            if difficulte == "Facile" or difficulte == "Moyen" or difficulte == "Difficile":
+            if difficulte == "Facile" or difficulte == "Difficile":
                 time.sleep(1)
                 deplacement_facile(cases_accessibles, joueurs_choix[compteur_lancers])
+                case = joueurs_choix[compteur_lancers].position
+                
+                nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
+                joueurs_choix[compteur_lancers].position = case
+
+                if joueur_sur_piege(joueurs_choix[compteur_lancers], piege_positions) :
+                    verifier_piege(case, piege_positions, piege_images)
+                    joueurs_piegee = True
+                    
+                if joueur_sur_shop(joueurs_choix[compteur_lancers], shop_positions) :
+                    if joueurs_choix[compteur_lancers].argent < 100 :
+                        shopping = False
+                    else :
+                        shopping = True
+                        while shopping :
+                            if joueurs_choix[compteur_lancers].argent >= 100 :
+                                choix_achat = random.randint(1, 4)
+                                if choix_achat == 1 and joueurs_choix[compteur_lancers].argent >= 300 :
+                                    joueurs_choix[compteur_lancers].attaque += 10
+                                    joueurs_choix[compteur_lancers].argent -= 300
+                                elif choix_achat == 2 and joueurs_choix[compteur_lancers].argent >= 300:
+                                    joueurs_choix[compteur_lancers].magie += 10
+                                    joueurs_choix[compteur_lancers].argent -= 300
+                                elif choix_achat == 3 and joueurs_choix[compteur_lancers].argent >= 100:
+                                    joueurs_choix[compteur_lancers].potion += 1
+                                    joueurs_choix[compteur_lancers].argent -= 100
+                                elif choix_achat == 4 and joueurs_choix[compteur_lancers].argent >= 200:
+                                    joueurs_choix[compteur_lancers].vitesse += 10
+                                    joueurs_choix[compteur_lancers].argent -= 200 
+                            else :
+                                shopping = False
+                                
+                if joueurs_piegee == True :
+                    for joueur in joueurs_choix:
+                        joueur.position = case
+                    choix_monstre = random.choice(monstre)
+                    monstre.remove(choix_monstre)
+                    if not combatMonstre.combatMonstre(joueurs_choix, choix_monstre, 0, choix, difficulte, vrai_joueur):
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        statistique.mise_en_stat(joueurs_choix, monstre_battu, False, nombre_tour, choix, int(duree), nb_potion, nb_argent)
+                        break
+                    joueurs_piegee = False
+                    compteur_lancers = 0
+                    monstre_battu += 1
+                
+                if piege_doree_possible == True and joueur_sur_piege_doree(joueurs_choix[compteur_lancers], piege_doree_positions) :
+                    choix_boss = random.choice(boss)
+                    if combatMonstre.combatMonstre(joueurs_choix, choix_boss, 0, choix, difficulte, vrai_joueur):
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        partie_finie = True
+                        monstre_battu = 6
+                    else:
+                        time_end = time.time()
+                        duree = time_end - time_start
+                        running = False
+                        partie_finie = False
+                    statistique.mise_en_stat(joueurs_choix, monstre_battu, partie_finie, nombre_tour, choix, int(duree), nb_potion, nb_argent)
+                    
+                    
+                cases_accessibles = []
+                compteur_lancers += 1
+                if compteur_lancers >= len(joueurs_choix):
+                    compteur_lancers = 0
+                    nombre_tour += 1
+                lancer_fait = False
+
+            if difficulte == "Moyen" :
+                time.sleep(1)
+                deplacement_intermediaire(cases_accessibles, joueurs_choix[compteur_lancers])
                 case = joueurs_choix[compteur_lancers].position
                 
                 nb_argent, nb_potion = verifier_objet_stat(case, potion_positions, potion_images, argent_positions, argent_images, joueurs_choix[compteur_lancers], nb_argent, nb_potion)
@@ -572,4 +645,4 @@ if __name__ == "__main__":
     joueurs_choix = []
     joueurs_choix.append(Joueur("Paladin", graphe, (5,10), 100, 100, 16, 12, 10, 3, 100, "img/classe/Paladin.png"))
     joueurs_choix.append(Joueur("Assassin", graphe, (5,10), 90, 90, 20, 10, 15, 3, 100, "img/classe/Assassin.png"))            
-    affichageGraphique(choix, graphe, joueurs_choix, "Facile", [False, False]) 
+    affichageGraphique(choix, graphe, joueurs_choix, "Moyen", [False, False]) 

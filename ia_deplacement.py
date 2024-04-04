@@ -12,23 +12,33 @@ def deplacement_facile(case_accessible, joueur):
     joueur.position = case_accessible[case]
         
 
+def deplacement_intermediaire(case_accessible, joueur):
+    directions = [(0, 1), (-1, 0), (0, -1), (1, 0)]  # Droite, Haut, Gauche, Bas
+    x, y = joueur.position
 
-def deplacement_intermediaire():
-    print("Stratégie de la main droite / Intermediare")
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Haut, Droite, Bas, Gauche
-    current_direction_index = 1  # départ: Droite
+    # Si c'est la première fois, initialiser le chemin parcouru
+    if not hasattr(joueur, 'parcours'):
+        joueur.parcours = []
 
-    x, y = 0, 0  # Position initiale
-    steps = 0
+    # Recherche de la direction de la main droite
+    index_direction = directions.index((1, 0))
 
-    while steps < 6:  # On fait 6 pas
-        next_direction_index = (current_direction_index + 1) % 4
-        next_x, next_y = x + directions[next_direction_index][0], y + directions[next_direction_index][1]
-        print("Avancer à droite vers", (next_x, next_y))
-        x, y = next_x, next_y
-        current_direction_index = next_direction_index
+    # Parcourir les directions dans le sens des aiguilles d'une montre
+    for _ in range(4):
+        new_x, new_y = x + directions[index_direction][0], y + directions[index_direction][1]
+        # Vérifier si la prochaine case dans la direction de la main droite est accessible et non visitée
+        if (new_x, new_y) in case_accessible and (new_x, new_y) not in joueur.parcours:
+            joueur.position = (new_x, new_y)
+            joueur.parcours.append((new_x, new_y))
+            return
+        # Tourner la direction vers la droite
+        index_direction = (index_direction + 1) % 4
 
-        steps += 1
+    # Si aucune direction n'est disponible, faire demi-tour
+    if (x, y) in joueur.parcours:
+        joueur.parcours.remove((x, y))  # Retirer la position actuelle du chemin parcouru pour éviter de boucler
+    joueur.position = (x - directions[index_direction][0], y - directions[index_direction][1])
+
 
 
           
